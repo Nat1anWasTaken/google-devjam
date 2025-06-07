@@ -7,16 +7,27 @@ type User = {
   updated_at: string; // ISO date string
 };
 
+type WordExample = {
+  id: string;
+  word_id: string;
+  sentence: string;
+};
+
 type Word = {
   id: string;
   word: string;
-  definition: string;
+  translation: string;
+  definition_zh: string;
+  definition_en: string;
   difficulty: number; // 1-10
+  part_of_speech: string;
+  root_word: string;
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 };
 
 type WordWithUserData = Word & {
   learn_count: number;
-  fluency: number; // 0-100
+  fluency: number; // 0-100 (integer)
+  examples: WordExample[];
 };

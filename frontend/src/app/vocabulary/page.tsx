@@ -16,7 +16,7 @@ export default function VocabularyPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold">單字庫</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          這裡是你的單字庫，所有學習過的單字將會在這裡顯示。
+          你有興趣的單字都在這裡，點擊查看詳細資訊或添加新單字。
         </p>
         <div className="mt-6 flex flex-col gap-4">
           {query.isLoading ? (
@@ -35,7 +35,9 @@ export default function VocabularyPage() {
                 key={word.id}
                 wordId={word.id}
                 word={word.word}
-                definition={word.definition}
+                definition_zh={word.definition_zh}
+                definition_en={word.definition_en}
+                partOfSpeech={word.part_of_speech}
               />
             ))
           )}
