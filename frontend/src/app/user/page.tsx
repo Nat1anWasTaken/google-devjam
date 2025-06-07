@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddInterestsDialog } from "@/components/add-interests-dialog";
-import { DifficultyLoadingAnimation } from "@/components/difficulty-loading-animation";
 import { InstallButton } from "@/components/install-button";
 import useAuth from "@/hooks/use-auth";
 import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
