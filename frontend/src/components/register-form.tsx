@@ -45,7 +45,7 @@ export function RegisterForm({ className, onSubmit, isSubmitting = false, error,
       password: value
     }));
     if (confirmPassword && value !== confirmPassword) {
-      setPasswordError("Passwords do not match");
+      setPasswordError("密碼不匹配");
     } else {
       setPasswordError("");
     }
@@ -54,7 +54,7 @@ export function RegisterForm({ className, onSubmit, isSubmitting = false, error,
   const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setConfirmPassword(e.target.value);
     if (formData.password && e.target.value !== formData.password) {
-      setPasswordError("Passwords do not match");
+      setPasswordError("密碼不匹配");
     } else {
       setPasswordError("");
     }
@@ -71,7 +71,7 @@ export function RegisterForm({ className, onSubmit, isSubmitting = false, error,
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="bg-transparent border-none shadow-none">
         <CardHeader>
-          <CardTitle>Create an account</CardTitle>
+          <CardTitle>註冊</CardTitle>
           <CardDescription>Enter your information below to create your account</CardDescription>
         </CardHeader>
         <CardContent>
