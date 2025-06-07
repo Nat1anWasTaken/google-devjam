@@ -1,0 +1,197 @@
+"use client";
+
+import { createAuthHeaders } from "./utils";
+
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
+
+// Request types
+type CreateWordRequest = {
+  word: string;
+};
+
+type UpdateWordRequest = {
+  difficulty?: number;
+};
+
+type LearnWordRequest = {
+  correct: boolean;
+};
+
+type GetWordsParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  difficulty?: number;
+};
+
+// Response types
+type GetWordsResponse = {
+  words: WordWithUserData[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+type WordResponse = {
+  word: Word;
+};
+
+type LearnWordResponse = {
+  message: string;
+  learn_count: number;
+  fluency: number;
+};
+
+type SuccessResponse = {
+  message: string;
+};
+
+type ErrorResponse = {
+  error: string;
+};
+
+// Helper function to build query string
+function buildQueryString(params: GetWordsParams): string {
+  const searchParams = new URLSearchParams();
+
+  if (params.page !== undefined) {
+    searchParams.append("page", params.page.toString());
+  }
+  if (params.limit !== undefined) {
+    searchParams.append("limit", params.limit.toString());
+  }
+  if (params.search !== undefined) {
+    searchParams.append("search", params.search);
+  }
+  if (params.difficulty !== undefined) {
+    searchParams.append("difficulty", params.difficulty.toString());
+  }
+
+  const queryString = searchParams.toString();
+  return queryString ? `?${queryString}` : "";
+}
+
+export async function createWord(
+  data: CreateWordRequest
+): Promise<WordResponse> {
+  const response = await fetch(`${baseUrl}/vocabulary`, {
+    credentials: "include",
+    method: "POST",
+    headers: createAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new Error(errorData.error || "Failed to create word");
+    (error as any).fullResponse = errorData;
+    throw error;
+  }
+
+  const responseData = await response.json();
+  return responseData;
+}
+
+export async function getWords(
+  params?: GetWordsParams
+): Promise<GetWordsResponse> {
+  const queryString = params ? buildQueryString(params) : "";
+
+  const response = await fetch(`${baseUrl}/vocabulary${queryString}`, {
+    credentials: "include",
+    method: "GET",
+    headers: createAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new Error(errorData.error || "Failed to get words");
+    (error as any).fullResponse = errorData;
+    throw error;
+  }
+
+  const responseData = await response.json();
+  return responseData;
+}
+
+export async function getWord(id: string): Promise<WordResponse> {
+  const response = await fetch(`${baseUrl}/vocabulary/${id}`, {
+    credentials: "include",
+    method: "GET",
+    headers: createAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new Error(errorData.error || "Failed to get word");
+    (error as any).fullResponse = errorData;
+    throw error;
+  }
+
+  const responseData = await response.json();
+  return responseData;
+}
+
+export async function updateWord(
+  id: string,
+  data: UpdateWordRequest
+): Promise<SuccessResponse> {
+  const response = await fetch(`${baseUrl}/vocabulary/${id}`, {
+    credentials: "include",
+    method: "PUT",
+    headers: createAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new Error(errorData.error || "Failed to update word");
+    (error as any).fullResponse = errorData;
+    throw error;
+  }
+
+  const responseData = await response.json();
+  return responseData;
+}
+
+export async function deleteWord(id: string): Promise<SuccessResponse> {
+  const response = await fetch(`${baseUrl}/vocabulary/${id}`, {
+    credentials: "include",
+    method: "DELETE",
+    headers: createAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new Error(errorData.error || "Failed to delete word");
+    (error as any).fullResponse = errorData;
+    throw error;
+  }
+
+  const responseData = await response.json();
+  return responseData;
+}
+
+export async function learnWord(
+  id: string,
+  data: LearnWordRequest
+): Promise<LearnWordResponse> {
+  const response = await fetch(`${baseUrl}/vocabulary/${id}/learn`, {
+    credentials: "include",
+    method: "POST",
+    headers: createAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new Error(
+      errorData.error || "Failed to update learning progress"
+    );
+    (error as any).fullResponse = errorData;
+    throw error;
+  }
+
+  const responseData = await response.json();
+  return responseData;
+}

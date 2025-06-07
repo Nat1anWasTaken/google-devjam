@@ -2,7 +2,9 @@
 
 import { isMobile } from "@/lib/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BottomNavigation } from "./bottom-navigation";
 import { DeviceNotSupported } from "./device-not-supported";
 
 const queryClient = new QueryClient();
@@ -14,6 +16,12 @@ export function RootContainer({
 }>) {
   const [isClient, setIsClient] = useState(false);
   const [mobile, setMobile] = useState(false);
+  const pathname = usePathname();
+
+  // Check if we're on a page that should show bottom navigation
+  const shouldShowBottomNav = ["/vocabulary", "/news", "/user"].includes(
+    pathname
+  );
 
   useEffect(() => {
     setIsClient(true);
@@ -34,9 +42,9 @@ export function RootContainer({
 
   return mobile ? (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col h-screen w-screen">
-        <div className="flex-grow"></div>
-        {children}
+      <div className="h-screen flex flex-col">
+        <main className="flex-grow h-0 pb-16">{children}</main>
+        {shouldShowBottomNav && <BottomNavigation />}
       </div>
     </QueryClientProvider>
   ) : (

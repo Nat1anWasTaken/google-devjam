@@ -2,18 +2,16 @@
 
 import { cn } from "@/lib/utils";
 import { BookOpen, Newspaper, User } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export type TabType = "vocabulary" | "news" | "user";
-
-interface BottomNavigationProps {
-  activeTab: TabType;
-  onTabChange: (tab: TabType) => void;
-}
 
 interface TabConfig {
   id: TabType;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  href: string;
 }
 
 const tabs: TabConfig[] = [
@@ -21,23 +19,25 @@ const tabs: TabConfig[] = [
     id: "vocabulary",
     label: "單字庫",
     icon: BookOpen,
+    href: "/vocabulary",
   },
   {
     id: "news",
     label: "新聞",
     icon: Newspaper,
+    href: "/news",
   },
   {
     id: "user",
     label: "用戶",
     icon: User,
+    href: "/user",
   },
 ];
 
-export function BottomNavigation({
-  activeTab,
-  onTabChange,
-}: BottomNavigationProps) {
+export function BottomNavigation() {
+  const pathname = usePathname();
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg z-50"
@@ -46,12 +46,15 @@ export function BottomNavigation({
     >
       <div className="flex h-16">
         {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
+          const isActive =
+            pathname === tab.href ||
+            (pathname === "/" && tab.id === "vocabulary");
           const Icon = tab.icon;
 
           return (
-            <button
+            <Link
               key={tab.id}
+              href={tab.href}
               role="tab"
               aria-selected={isActive}
               aria-controls={`${tab.id}-panel`}
@@ -62,7 +65,6 @@ export function BottomNavigation({
                   ? "text-primary bg-accent/30"
                   : "text-muted-foreground hover:text-foreground"
               )}
-              onClick={() => onTabChange(tab.id)}
             >
               <Icon
                 className={cn(
@@ -78,7 +80,7 @@ export function BottomNavigation({
               >
                 {tab.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </div>

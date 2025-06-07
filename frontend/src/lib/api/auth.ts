@@ -2,6 +2,7 @@
 
 import { LoginData } from "@/components/login-form";
 import { RegisterData } from "@/components/register-form";
+import { createAuthHeaders } from "./utils";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
 
@@ -88,21 +89,10 @@ export async function loginUser(userData: LoginData): Promise<LoginResponse> {
 }
 
 export async function getUser(): Promise<User | null> {
-  const token = getStoredToken();
-
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
-  // Add authorization header if token exists
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
   const response = await fetch(`${baseUrl}/auth/me`, {
     credentials: "include",
     method: "GET",
-    headers,
+    headers: createAuthHeaders(),
   });
 
   if (!response.ok) {
