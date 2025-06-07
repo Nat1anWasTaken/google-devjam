@@ -72,8 +72,7 @@ func (c *Client) UploadAudio(audioData []byte, filename string, newsID string) (
 	}
 
 	// Generate public URL (assuming bucket is public)
-	publicURL := fmt.Sprintf("http://%s/%s/%s",
-		c.minioClient.EndpointURL().Host,
+	publicURL := fmt.Sprintf("/%s/%s",
 		c.bucketName,
 		objectKey)
 
