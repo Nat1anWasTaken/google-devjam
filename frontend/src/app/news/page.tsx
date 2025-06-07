@@ -1,7 +1,7 @@
 "use client";
 
 import { NewsCard } from "@/components/news-card";
-import { NewsCardSkeleton } from "@/components/news-card-skeleton";
+import { NewsLoadingAnimation } from "@/components/news-loading-animation";
 import { Button } from "@/components/ui/button";
 import { generateNews } from "@/lib/api/news";
 import { useQuery } from "@tanstack/react-query";
@@ -28,7 +28,7 @@ export default function NewsPage() {
 
         <div className="mt-6">
           {query.isLoading ? (
-            <NewsCardSkeleton />
+            <NewsLoadingAnimation />
           ) : query.error ? (
             <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
               <p className="text-sm text-muted-foreground">

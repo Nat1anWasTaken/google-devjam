@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, ExternalLink, Tag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Markdown from "react-markdown";
+import { DifficultyBadge } from "@/components/difficulty-badge";
+import { mapLevelToDifficulty } from "@/lib/utils";
 
 interface NewsCardProps {
   news: News;
@@ -12,32 +14,6 @@ interface NewsCardProps {
 
 export function NewsCard({ news }: NewsCardProps) {
   const router = useRouter();
-
-  const getLevelBadgeVariant = (level: string) => {
-    switch (level) {
-      case "beginner":
-        return "secondary";
-      case "intermediate":
-        return "default";
-      case "advanced":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const getLevelText = (level: string) => {
-    switch (level) {
-      case "beginner":
-        return "初級";
-      case "intermediate":
-        return "中級";
-      case "advanced":
-        return "高級";
-      default:
-        return level;
-    }
-  };
 
   return (
     <Card
@@ -49,19 +25,14 @@ export function NewsCard({ news }: NewsCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-xl leading-tight">{news.title}</CardTitle>
-          <Badge
-            variant={getLevelBadgeVariant(news.level)}
-            className="shrink-0"
-          >
-            {getLevelText(news.level)}
-          </Badge>
+          <DifficultyBadge difficulty={mapLevelToDifficulty(news.level)} />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="prose prose-sm max-w-none">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed">
+          <div className="whitespace-pre-wrap text-sm leading-relaxed">
             <Markdown>{news.content.slice(0, 200) + "..."}</Markdown>
-          </p>
+          </div>
         </div>
 
         {news.keywords.length > 0 && (

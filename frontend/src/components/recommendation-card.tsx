@@ -4,10 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Plus, X } from "lucide-react";
-import { getDifficultyColor } from "@/lib/utils";
 import { createWord } from "@/lib/api/vocabulary";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { DifficultyBadge } from "@/components/difficulty-badge";
 
 type RecommendationCardProps = {
   word: WordWithUserData;
@@ -225,13 +225,7 @@ export function RecommendationCard({
                 <Badge variant="outline" className="text-muted-foreground">
                   {word.part_of_speech ? word.part_of_speech : "Unknown"}
                 </Badge>
-                <Badge
-                  className={`text-white ${getDifficultyColor(
-                    word.difficulty
-                  )}`}
-                >
-                  難度 {word.difficulty}/10
-                </Badge>
+                <DifficultyBadge difficulty={word.difficulty} />
               </div>
             )}
           </div>

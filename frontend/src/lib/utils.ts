@@ -32,6 +32,20 @@ export const getDifficultyColor = (difficulty: number) => {
   return "bg-red-500";
 };
 
+// 將新聞等級映射到難度數值
+export const mapLevelToDifficulty = (level: string): number => {
+  switch (level) {
+    case "beginner":
+      return 1;
+    case "intermediate":
+      return 5;
+    case "advanced":
+      return 7;
+    default:
+      return 5; // fallback to intermediate
+  }
+};
+
 // Generate Gravatar URL from email (async)
 export const getGravatarUrl = async (
   email: string,

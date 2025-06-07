@@ -7,8 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, Calendar, ExternalLink, Tag } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  Calendar,
+  ExternalLink,
+  Swords,
+  Tag,
+} from "lucide-react";
 import Markdown from "react-markdown";
+import { mapLevelToDifficulty } from "@/lib/utils";
+import { DifficultyBadge } from "@/components/difficulty-badge";
+import { QuizComponentSkeleton } from "@/components/quiz-component-skeleton";
+import { QuizComponent } from "@/components/quiz-component";
+import { useNewsVocabulary } from "@/hooks/use-news-vocabulary";
 
 export default function NewsPage() {
   const params = useParams();
@@ -25,33 +36,12 @@ export default function NewsPage() {
     enabled: !!newsId,
   });
 
-  const getLevelBadgeVariant = (level: string) => {
-    switch (level) {
-      case "beginner":
-        return "secondary";
-      case "intermediate":
-        return "default";
-      case "advanced":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const getLevelText = (level: string) => {
-    switch (level) {
-      case "beginner":
-        return "初級";
-      case "intermediate":
-        return "中級";
-      case "advanced":
-        return "高級";
-      default:
-        return level;
-    }
-  };
-
   const news = newsResponse?.news;
+
+  const wordInNews = news?.word_in_news || [];
+
+  const { wordsQuery, wordsToQuiz, updateFluencyMutation } =
+    useNewsVocabulary(wordInNews);
 
   if (loading) {
     return (
@@ -148,12 +138,7 @@ export default function NewsPage() {
           <h1 className="text-2xl md:text-3xl font-bold leading-tight">
             {news.title}
           </h1>
-          <Badge
-            variant={getLevelBadgeVariant(news.level)}
-            className="shrink-0"
-          >
-            {getLevelText(news.level)}
-          </Badge>
+          <DifficultyBadge difficulty={mapLevelToDifficulty(news.level)} />
         </div>
 
         {/* Article content */}
@@ -163,6 +148,29 @@ export default function NewsPage() {
           </div>
         </div>
 
+        <Separator />
+
+        {/* Quiz section */}
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <Swords className="h-4 w-4" />
+          <span>牛刀小試</span>
+        </div>
+        {wordsQuery.isLoading ? (
+          <QuizComponentSkeleton />
+        ) : (
+          <div className="space-y-4">
+            {wordsToQuiz.length > 0 &&
+              wordsToQuiz.map((word) => (
+                <QuizComponent
+                  key={word.id}
+                  word={word}
+                  onComplete={() => {
+                    // Handle quiz completion
+                  }}
+                />
+              ))}
+          </div>
+        )}
         <Separator />
 
         {/* Keywords section */}
