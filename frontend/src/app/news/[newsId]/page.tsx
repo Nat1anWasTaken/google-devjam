@@ -17,6 +17,8 @@ import { QuizComponent } from "@/components/quiz-component";
 import { useNewsVocabulary } from "@/hooks/use-news-vocabulary";
 import AudioPlayer from "@/components/audio-player";
 
+const s3BaseUrl = process.env.NEXT_PUBLIC_BUCKET_BASE;
+
 export default function NewsPage() {
   const params = useParams();
   const router = useRouter();
@@ -130,7 +132,7 @@ export default function NewsPage() {
 
         {/* Audio Player */}
         {news.audio_url ? (
-          <AudioPlayer audioUrl={news.audio_url} newsId={news.id} />
+          <AudioPlayer audioUrl={s3BaseUrl + news.audio_url} newsId={news.id} />
         ) : (
           <div className="flex flex-row justify-start items-center gap-2 text-sm text-muted-foreground">
             <VolumeOff className="h-4 w-4" />
