@@ -117,7 +117,7 @@ export default function UserPage() {
               {/* Avatar */}
               <div className="relative">
                 <img
-                  src={avatarUrl ? avatarUrl : null}
+                  src={avatarUrl ? avatarUrl : undefined}
                   alt={`${user.display_name} 的頭像`}
                   className="size-24 rounded-full border-4 border-background shadow-lg"
                   onError={(e) => {
