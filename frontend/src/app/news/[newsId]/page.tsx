@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { getSingleNews } from "@/lib/api/news";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -11,6 +12,7 @@ import {
   ArrowLeftIcon,
   Calendar,
   ExternalLink,
+  PartyPopper,
   Swords,
   Tag,
 } from "lucide-react";
@@ -25,6 +27,11 @@ export default function NewsPage() {
   const params = useParams();
   const router = useRouter();
   const newsId = params.newsId as string;
+
+  // State to track completed/removed quizzes
+  const [completedQuizzes, setCompletedQuizzes] = useState<Set<string>>(
+    new Set()
+  );
 
   const {
     data: newsResponse,
@@ -41,6 +48,16 @@ export default function NewsPage() {
   const wordInNews = news?.word_in_news || [];
 
   const { wordsQuery, wordsToQuiz } = useNewsVocabulary(wordInNews);
+
+  // Filter out completed quizzes
+  const remainingQuizzes = wordsToQuiz.filter(
+    (word) => !completedQuizzes.has(word.id)
+  );
+
+  // Handle quiz removal
+  const handleQuizRemove = (wordId: string) => {
+    setCompletedQuizzes((prev) => new Set([...prev, wordId]));
+  };
 
   if (loading) {
     return (
@@ -158,16 +175,27 @@ export default function NewsPage() {
           <QuizComponentSkeleton />
         ) : (
           <div className="space-y-4">
-            {wordsToQuiz.length > 0 &&
-              wordsToQuiz.map((word) => (
+            {remainingQuizzes.length > 0 ? (
+              remainingQuizzes.map((word) => (
                 <QuizComponent
                   key={word.id}
                   word={word}
-                  onComplete={() => {
-                    // Handle quiz completion
-                  }}
+                  onRemove={handleQuizRemove}
                 />
-              ))}
+              ))
+            ) : wordsToQuiz.length > 0 ? (
+              <div className="flex flex-row justify-center items-center gap-2">
+                <PartyPopper />
+                <p className="text-sm text-muted-foreground">
+                  所有測驗已完成！
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-row justify-center items-center gap-2">
+                <PartyPopper />
+                <p className="text-sm text-muted-foreground">沒有測驗</p>
+              </div>
+            )}
           </div>
         )}
         <Separator />
