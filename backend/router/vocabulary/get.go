@@ -16,12 +16,12 @@ import (
 
 type WordWithUserData struct {
 	model.Word
-	LearnCount   int      `json:"learn_count"`
-	Fluency      int      `json:"fluency"`
-	PartOfSpeech string   `json:"part_of_speech"`
-	Example      []string `json:"example"`
-	RootWord     string   `json:"root_word"`
-	Origin       string   `json:"origin"`
+	LearnCount   int                 `json:"learn_count"`
+	Fluency      int                 `json:"fluency"`
+	PartOfSpeech string              `json:"part_of_speech"`
+	Examples     []model.WordExample `json:"examples"`
+	RootWord     string              `json:"root_word"`
+	Origin       string              `json:"origin"`
 }
 
 type GetWordsResponse struct {
@@ -41,19 +41,25 @@ func getStringFromBSON(data bson.M, key string) string {
 	return ""
 }
 
-func getStringArrayFromBSON(data bson.M, key string) []string {
-	if val, ok := data[key]; ok && val != nil {
-		if arr, ok := val.(primitive.A); ok {
-			result := make([]string, 0, len(arr))
-			for _, item := range arr {
-				if str, ok := item.(string); ok {
-					result = append(result, str)
-				}
-			}
-			return result
-		}
+// Helper function to fetch WordExample records for a word
+func getWordExamples(wordID string) ([]model.WordExample, error) {
+	wordExamplesCollection := mongodb.GetCollection("word_examples")
+	if wordExamplesCollection == nil {
+		return []model.WordExample{}, nil
 	}
-	return []string{}
+
+	cursor, err := wordExamplesCollection.Find(context.Background(), bson.M{"word_id": wordID})
+	if err != nil {
+		return []model.WordExample{}, err
+	}
+	defer cursor.Close(context.Background())
+
+	var examples []model.WordExample
+	if err := cursor.All(context.Background(), &examples); err != nil {
+		return []model.WordExample{}, err
+	}
+
+	return examples, nil
 }
 
 // GetWords retrieves all words for the authenticated user with pagination
@@ -196,10 +202,14 @@ func GetWords(c echo.Context) error {
 	words := make([]WordWithUserData, 0, len(results))
 	for _, result := range results {
 		wordData := result["word_data"].(bson.M)
+		wordID := getStringFromBSON(wordData, "_id")
+
+		// Fetch examples for this word
+		examples, _ := getWordExamples(wordID) // Ignore error, continue with empty examples
 
 		word := WordWithUserData{
 			Word: model.Word{
-				ID:         getStringFromBSON(wordData, "_id"),
+				ID:         wordID,
 				Word:       getStringFromBSON(wordData, "word"),
 				Definition: getStringFromBSON(wordData, "definition"),
 				Difficulty: int(wordData["difficulty"].(int32)),
@@ -209,7 +219,7 @@ func GetWords(c echo.Context) error {
 			LearnCount:   int(result["learn_count"].(int32)),
 			Fluency:      int(result["fluency"].(int32)),
 			PartOfSpeech: getStringFromBSON(result, "part_of_speech"),
-			Example:      getStringArrayFromBSON(result, "example"),
+			Examples:     examples, // Use fetched WordExample records
 			RootWord:     getStringFromBSON(result, "root_word"),
 			Origin:       getStringFromBSON(result, "origin"),
 		}
@@ -294,10 +304,14 @@ func GetWord(c echo.Context) error {
 
 	result := results[0]
 	wordData := result["word_data"].(bson.M)
+	wordIDStr := getStringFromBSON(wordData, "_id")
+
+	// Fetch examples for this word
+	examples, _ := getWordExamples(wordIDStr) // Ignore error, continue with empty examples
 
 	word := WordWithUserData{
 		Word: model.Word{
-			ID:         getStringFromBSON(wordData, "_id"),
+			ID:         wordIDStr,
 			Word:       getStringFromBSON(wordData, "word"),
 			Definition: getStringFromBSON(wordData, "definition"),
 			Difficulty: int(wordData["difficulty"].(int32)),
@@ -307,7 +321,7 @@ func GetWord(c echo.Context) error {
 		LearnCount:   int(result["learn_count"].(int32)),
 		Fluency:      int(result["fluency"].(int32)),
 		PartOfSpeech: getStringFromBSON(result, "part_of_speech"),
-		Example:      getStringArrayFromBSON(result, "example"),
+		Examples:     examples, // Use fetched WordExample records
 		RootWord:     getStringFromBSON(result, "root_word"),
 		Origin:       getStringFromBSON(result, "origin"),
 	}

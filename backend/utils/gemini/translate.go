@@ -77,7 +77,7 @@ If the word IS valid, provide Chinese translation using traditional Chinese char
    - 4-6: Intermediate words (beautiful, important, develop)
    - 7-10: Advanced, complex, or rare words (sophisticated, phenomenon, ubiquitous)
 
-For examples, create simple, clear sentences that demonstrate the word's usage. Keep sentences short and easy to understand.
+For examples, create simple, clear English sentences that demonstrate the word's usage. Keep sentences short and easy to understand.
 
 Word to analyze: "%s"
 
@@ -86,7 +86,7 @@ Respond in this exact JSON format:
   "definition": "Chinese translation in traditional Chinese (only if valid)",
   "is_valid": true/false,
   "difficulty": 1-10 (only if valid, otherwise 0),
-  "examples": ["example sentence 1", "example sentence 2", "example sentence 3"] (only if valid, otherwise empty array),
+  "examples": ["English example sentence 1", "English example sentence 2", "English example sentence 3"] (only if valid, otherwise empty array),
   "reason": "explanation if invalid (e.g., 'This is not a real English word', 'This is a proper noun', 'This is past tense of run', 'This is plural form of cat')"
 }
 

@@ -25,6 +25,44 @@ type WordResponse struct {
 	Word model.Word `json:"word"`
 }
 
+// Helper function to create WordExample records
+func createWordExamples(wordID string, examples []string) error {
+	if len(examples) == 0 {
+		return nil
+	}
+
+	wordExamplesCollection := mongodb.GetCollection("word_examples")
+	if wordExamplesCollection == nil {
+		return mongo.ErrClientDisconnected
+	}
+
+	var wordExamples []interface{}
+	for _, example := range examples {
+		if strings.TrimSpace(example) == "" {
+			continue
+		}
+
+		exampleID, err := encrypt.GenerateSnowflakeID()
+		if err != nil {
+			continue // Skip this example if ID generation fails
+		}
+
+		wordExample := model.WordExample{
+			ID:       exampleID,
+			WordID:   wordID,
+			Sentence: strings.TrimSpace(example),
+		}
+		wordExamples = append(wordExamples, wordExample)
+	}
+
+	if len(wordExamples) > 0 {
+		_, err := wordExamplesCollection.InsertMany(context.Background(), wordExamples)
+		return err
+	}
+
+	return nil
+}
+
 func CreateWord(c echo.Context) error {
 	var req CreateWordRequest
 	if err := c.Bind(&req); err != nil {
@@ -106,12 +144,6 @@ func CreateWord(c echo.Context) error {
 			})
 		}
 
-		// Use examples from Gemini if available
-		examples := []string{}
-		if len(translation.Examples) > 0 {
-			examples = translation.Examples
-		}
-
 		now := time.Now()
 		userWord := model.UserWord{
 			ID:           userWordID,
@@ -120,7 +152,6 @@ func CreateWord(c echo.Context) error {
 			LearnCount:   0,
 			Fluency:      0,
 			PartOfSpeech: "",
-			Example:      examples,
 			RootWord:     "",
 			Origin:       "",
 			CreatedAt:    now,
@@ -132,6 +163,14 @@ func CreateWord(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "Failed to add word to vocabulary",
 			})
+		}
+
+		// Create WordExample records if available
+		if len(translation.Examples) > 0 {
+			if err := createWordExamples(existingWord.ID, translation.Examples); err != nil {
+				// Log error but don't fail the request
+				// Examples are not critical for word creation
+			}
 		}
 
 		return c.JSON(http.StatusCreated, WordResponse{
@@ -211,12 +250,6 @@ func CreateWord(c echo.Context) error {
 		})
 	}
 
-	// Use examples from Gemini if available
-	examples := []string{}
-	if len(translation.Examples) > 0 {
-		examples = translation.Examples
-	}
-
 	userWord := model.UserWord{
 		ID:           userWordID,
 		UserID:       userID,
@@ -224,7 +257,6 @@ func CreateWord(c echo.Context) error {
 		LearnCount:   0,
 		Fluency:      0,
 		PartOfSpeech: "",
-		Example:      examples,
 		RootWord:     "",
 		Origin:       "",
 		CreatedAt:    now,
@@ -236,6 +268,14 @@ func CreateWord(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to add word to vocabulary",
 		})
+	}
+
+	// Create WordExample records if available
+	if len(translation.Examples) > 0 {
+		if err := createWordExamples(wordID, translation.Examples); err != nil {
+			// Log error but don't fail the request
+			// Examples are not critical for word creation
+		}
 	}
 
 	return c.JSON(http.StatusCreated, WordResponse{

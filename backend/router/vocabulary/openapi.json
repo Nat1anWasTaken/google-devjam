@@ -239,7 +239,18 @@
                       "learn_count": 5,
                       "fluency": 80,
                       "part_of_speech": "interjection",
-                      "example": ["Hello, how are you?", "Say hello to your friend.", "Hello there!"],
+                      "examples": [
+                        {
+                          "id": "1234567890123456790",
+                          "word_id": "1234567890123456789",
+                          "sentence": "Hello, how are you?"
+                        },
+                        {
+                          "id": "1234567890123456791",
+                          "word_id": "1234567890123456789",
+                          "sentence": "Say hello to your friend."
+                        }
+                      ],
                       "root_word": "",
                       "origin": ""
                     }
@@ -408,7 +419,8 @@
                 "$ref": "#/components/schemas/UpdateWordRequest"
               },
               "example": {
-                "difficulty": 5
+                "difficulty": 5,
+                "examples": ["Hello, how are you?", "Say hello to your friend."]
               }
             }
           }
@@ -706,6 +718,251 @@
           }
         }
       }
+    },
+    "/vocabulary/{id}/examples": {
+      "post": {
+        "tags": ["Examples"],
+        "summary": "Add example sentence",
+        "description": "Add a new example sentence to a word in the user's vocabulary",
+        "operationId": "addExample",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddExampleRequest"
+              },
+              "example": {
+                "sentence": "Hello, how are you today?"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Example added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddExampleResponse"
+                },
+                "example": {
+                  "message": "Example added successfully",
+                  "example": {
+                    "id": "1234567890123456790",
+                    "word_id": "1234567890123456789",
+                    "sentence": "Hello, how are you today?"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "word_id_required": {
+                    "summary": "Word ID is required",
+                    "value": {
+                      "error": "Word ID is required"
+                    }
+                  },
+                  "sentence_required": {
+                    "summary": "Example sentence is required",
+                    "value": {
+                      "error": "Example sentence is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Word not found in user's vocabulary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word not found in your vocabulary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to add example"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vocabulary/{id}/examples/{exampleId}": {
+      "delete": {
+        "tags": ["Examples"],
+        "summary": "Delete example sentence",
+        "description": "Remove an example sentence from a word in the user's vocabulary",
+        "operationId": "deleteExample",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          },
+          {
+            "name": "exampleId",
+            "in": "path",
+            "description": "Example ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456790"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Example deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "message": "Example deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "word_id_required": {
+                    "summary": "Word ID is required",
+                    "value": {
+                      "error": "Word ID is required"
+                    }
+                  },
+                  "example_id_required": {
+                    "summary": "Example ID is required",
+                    "value": {
+                      "error": "Example ID is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Word or example not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "word_not_found": {
+                    "summary": "Word not found in vocabulary",
+                    "value": {
+                      "error": "Word not found in your vocabulary"
+                    }
+                  },
+                  "example_not_found": {
+                    "summary": "Example not found",
+                    "value": {
+                      "error": "Example not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to delete example"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -737,12 +994,12 @@
             "description": "Part of speech (noun, verb, adjective, etc.)",
             "example": "noun"
           },
-          "example": {
+          "examples": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Example sentences using this word",
+            "description": "Example sentences using this word (replaces all existing examples)",
             "example": ["Hello, how are you?", "Say hello to your friend."]
           },
           "root_word": {
@@ -754,6 +1011,18 @@
             "type": "string",
             "description": "Etymology or origin of the word",
             "example": "From Old English 'hælan'"
+          }
+        }
+      },
+      "AddExampleRequest": {
+        "type": "object",
+        "required": ["sentence"],
+        "properties": {
+          "sentence": {
+            "type": "string",
+            "description": "Example sentence using the word",
+            "example": "Hello, how are you today?",
+            "minLength": 1
           }
         }
       },
@@ -807,6 +1076,26 @@
           }
         }
       },
+      "WordExample": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique example identifier (Snowflake ID)",
+            "example": "1234567890123456790"
+          },
+          "word_id": {
+            "type": "string",
+            "description": "ID of the word this example belongs to",
+            "example": "1234567890123456789"
+          },
+          "sentence": {
+            "type": "string",
+            "description": "Example sentence using the word",
+            "example": "Hello, how are you?"
+          }
+        }
+      },
       "WordWithUserData": {
         "allOf": [
           {
@@ -832,13 +1121,24 @@
                 "description": "Part of speech (noun, verb, adjective, etc.)",
                 "example": "noun"
               },
-              "example": {
+              "examples": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/WordExample"
                 },
                 "description": "Example sentences using this word",
-                "example": ["Hello, how are you?", "Say hello to your friend."]
+                "example": [
+                  {
+                    "id": "1234567890123456790",
+                    "word_id": "1234567890123456789",
+                    "sentence": "Hello, how are you?"
+                  },
+                  {
+                    "id": "1234567890123456791",
+                    "word_id": "1234567890123456789",
+                    "sentence": "Say hello to your friend."
+                  }
+                ]
               },
               "root_word": {
                 "type": "string",
@@ -886,6 +1186,19 @@
             "type": "integer",
             "description": "Number of words per page",
             "example": 20
+          }
+        }
+      },
+      "AddExampleResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Example added successfully"
+          },
+          "example": {
+            "$ref": "#/components/schemas/WordExample"
           }
         }
       },
@@ -947,6 +1260,10 @@
     {
       "name": "Learning",
       "description": "Learning progress tracking endpoints"
+    },
+    {
+      "name": "Examples",
+      "description": "Example sentence management endpoints"
     }
   ]
 } 

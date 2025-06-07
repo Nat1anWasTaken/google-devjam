@@ -18,4 +18,8 @@ func InitRoutes(e *echo.Echo) {
 
 	// User word learning endpoints
 	v.POST("/:id/learn", LearnWord) // POST /vocabulary/:id/learn - Mark word as learned
+
+	// Example management endpoints
+	v.POST("/:id/examples", AddExample)                    // POST /vocabulary/:id/examples - Add example to word
+	v.DELETE("/:id/examples/:exampleId", DeleteExample)    // DELETE /vocabulary/:id/examples/:exampleId - Delete specific example
 }
