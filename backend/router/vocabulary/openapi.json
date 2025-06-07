@@ -234,11 +234,12 @@
                       "word": "hello",
                       "definition": "你好",
                       "difficulty": 2,
+                      "part_of_speech": "interjection",
+                      "root_word": "hello",
                       "created_at": "2024-01-15T10:30:00Z",
                       "updated_at": "2024-01-15T10:30:00Z",
                       "learn_count": 5,
                       "fluency": 80,
-                      "part_of_speech": "interjection",
                       "examples": [
                         {
                           "id": "1234567890123456790",
@@ -250,9 +251,7 @@
                           "word_id": "1234567890123456789",
                           "sentence": "Say hello to your friend."
                         }
-                      ],
-                      "root_word": "",
-                      "origin": ""
+                      ]
                     }
                   ],
                   "total": 1,
@@ -963,6 +962,102 @@
           }
         }
       }
+    },
+    "/vocabulary/recommend": {
+      "get": {
+        "tags": ["Recommendations"],
+        "summary": "Get word recommendations",
+        "description": "Get 10 personalized word recommendations based on the user's current vocabulary. The system analyzes user's existing words, gets recommendations from Gemini AI, validates and translates new words, then stores them in the recommendation collection.",
+        "operationId": "getRecommendations",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Word recommendations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendResponse"
+                },
+                "example": {
+                  "words": [
+                    {
+                      "id": "1234567890123456789",
+                      "word": "beautiful",
+                      "definition": "美麗的",
+                      "difficulty": 4,
+                      "part_of_speech": "adjective",
+                      "root_word": "beautiful",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-15T10:30:00Z",
+                      "learn_count": 0,
+                      "fluency": 0,
+                      "examples": [
+                        {
+                          "id": "1234567890123456790",
+                          "word_id": "1234567890123456789",
+                          "sentence": "She has a beautiful smile."
+                        },
+                        {
+                          "id": "1234567890123456791",
+                          "word_id": "1234567890123456789",
+                          "sentence": "The sunset is beautiful tonight."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "user_words_error": {
+                    "summary": "Failed to get user words",
+                    "value": {
+                      "error": "Failed to get user words: Database connection error"
+                    }
+                  },
+                  "gemini_error": {
+                    "summary": "Failed to get recommendations",
+                    "value": {
+                      "error": "Failed to get recommendations: Gemini API error"
+                    }
+                  },
+                  "database_error": {
+                    "summary": "Database connection error",
+                    "value": {
+                      "error": "Database connection error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1006,11 +1101,6 @@
             "type": "string",
             "description": "Root form of the word (e.g., 'run' for 'ran')",
             "example": "run"
-          },
-          "origin": {
-            "type": "string",
-            "description": "Etymology or origin of the word",
-            "example": "From Old English 'hælan'"
           }
         }
       },
@@ -1061,6 +1151,16 @@
             "minimum": 1,
             "maximum": 10,
             "example": 2
+          },
+          "part_of_speech": {
+            "type": "string",
+            "description": "Part of speech (noun, verb, adjective, etc.)",
+            "example": "interjection"
+          },
+          "root_word": {
+            "type": "string",
+            "description": "Root form of the word (e.g., 'run' for 'ran')",
+            "example": "hello"
           },
           "created_at": {
             "type": "string",
@@ -1116,11 +1216,6 @@
                 "maximum": 100,
                 "example": 80
               },
-              "part_of_speech": {
-                "type": "string",
-                "description": "Part of speech (noun, verb, adjective, etc.)",
-                "example": "noun"
-              },
               "examples": {
                 "type": "array",
                 "items": {
@@ -1139,16 +1234,6 @@
                     "sentence": "Say hello to your friend."
                   }
                 ]
-              },
-              "root_word": {
-                "type": "string",
-                "description": "Root form of the word (e.g., 'run' for 'ran')",
-                "example": "run"
-              },
-              "origin": {
-                "type": "string",
-                "description": "Etymology or origin of the word",
-                "example": "From Old English 'hælan'"
               }
             }
           }
@@ -1232,6 +1317,19 @@
           }
         }
       },
+      "RecommendResponse": {
+        "type": "object",
+        "properties": {
+          "words": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WordWithUserData"
+            },
+            "description": "Array of recommended words with user learning data",
+            "maxItems": 10
+          }
+        }
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
@@ -1264,6 +1362,10 @@
     {
       "name": "Examples",
       "description": "Example sentence management endpoints"
+    },
+    {
+      "name": "Recommendations",
+      "description": "Word recommendation endpoints powered by AI"
     }
   ]
 } 

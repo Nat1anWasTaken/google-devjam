@@ -16,12 +16,9 @@ import (
 
 type WordWithUserData struct {
 	model.Word
-	LearnCount   int                 `json:"learn_count"`
-	Fluency      int                 `json:"fluency"`
-	PartOfSpeech string              `json:"part_of_speech"`
-	Examples     []model.WordExample `json:"examples"`
-	RootWord     string              `json:"root_word"`
-	Origin       string              `json:"origin"`
+	LearnCount int                 `json:"learn_count"`
+	Fluency    int                 `json:"fluency"`
+	Examples   []model.WordExample `json:"examples"`
 }
 
 type GetWordsResponse struct {
@@ -209,19 +206,18 @@ func GetWords(c echo.Context) error {
 
 		word := WordWithUserData{
 			Word: model.Word{
-				ID:         wordID,
-				Word:       getStringFromBSON(wordData, "word"),
-				Definition: getStringFromBSON(wordData, "definition"),
-				Difficulty: int(wordData["difficulty"].(int32)),
-				CreatedAt:  wordData["created_at"].(primitive.DateTime).Time(),
-				UpdatedAt:  wordData["updated_at"].(primitive.DateTime).Time(),
+				ID:           wordID,
+				Word:         getStringFromBSON(wordData, "word"),
+				Definition:   getStringFromBSON(wordData, "definition"),
+				Difficulty:   int(wordData["difficulty"].(int32)),
+				PartOfSpeech: getStringFromBSON(wordData, "part_of_speech"),
+				RootWord:     getStringFromBSON(wordData, "root_word"),
+				CreatedAt:    wordData["created_at"].(primitive.DateTime).Time(),
+				UpdatedAt:    wordData["updated_at"].(primitive.DateTime).Time(),
 			},
-			LearnCount:   int(result["learn_count"].(int32)),
-			Fluency:      int(result["fluency"].(int32)),
-			PartOfSpeech: getStringFromBSON(result, "part_of_speech"),
-			Examples:     examples, // Use fetched WordExample records
-			RootWord:     getStringFromBSON(result, "root_word"),
-			Origin:       getStringFromBSON(result, "origin"),
+			LearnCount: int(result["learn_count"].(int32)),
+			Fluency:    int(result["fluency"].(int32)),
+			Examples:   examples,
 		}
 
 		words = append(words, word)
@@ -311,19 +307,18 @@ func GetWord(c echo.Context) error {
 
 	word := WordWithUserData{
 		Word: model.Word{
-			ID:         wordIDStr,
-			Word:       getStringFromBSON(wordData, "word"),
-			Definition: getStringFromBSON(wordData, "definition"),
-			Difficulty: int(wordData["difficulty"].(int32)),
-			CreatedAt:  wordData["created_at"].(primitive.DateTime).Time(),
-			UpdatedAt:  wordData["updated_at"].(primitive.DateTime).Time(),
+			ID:           wordIDStr,
+			Word:         getStringFromBSON(wordData, "word"),
+			Definition:   getStringFromBSON(wordData, "definition"),
+			Difficulty:   int(wordData["difficulty"].(int32)),
+			PartOfSpeech: getStringFromBSON(wordData, "part_of_speech"),
+			RootWord:     getStringFromBSON(wordData, "root_word"),
+			CreatedAt:    wordData["created_at"].(primitive.DateTime).Time(),
+			UpdatedAt:    wordData["updated_at"].(primitive.DateTime).Time(),
 		},
-		LearnCount:   int(result["learn_count"].(int32)),
-		Fluency:      int(result["fluency"].(int32)),
-		PartOfSpeech: getStringFromBSON(result, "part_of_speech"),
-		Examples:     examples, // Use fetched WordExample records
-		RootWord:     getStringFromBSON(result, "root_word"),
-		Origin:       getStringFromBSON(result, "origin"),
+		LearnCount: int(result["learn_count"].(int32)),
+		Fluency:    int(result["fluency"].(int32)),
+		Examples:   examples,
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{

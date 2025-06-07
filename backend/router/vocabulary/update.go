@@ -21,7 +21,6 @@ type UpdateWordRequest struct {
 	PartOfSpeech string   `json:"part_of_speech,omitempty"`
 	Examples     []string `json:"examples,omitempty"`
 	RootWord     string   `json:"root_word,omitempty"`
-	Origin       string   `json:"origin,omitempty"`
 }
 
 type LearnWordRequest struct {
@@ -138,17 +137,6 @@ func UpdateWord(c echo.Context) error {
 		"updated_at": time.Now(),
 	}
 
-	// Add UserWord fields to update
-	if req.PartOfSpeech != "" {
-		updateData["part_of_speech"] = req.PartOfSpeech
-	}
-	if req.RootWord != "" {
-		updateData["root_word"] = req.RootWord
-	}
-	if req.Origin != "" {
-		updateData["origin"] = req.Origin
-	}
-
 	// Update the user word
 	_, err = userWordsCollection.UpdateOne(
 		context.Background(),
@@ -174,8 +162,8 @@ func UpdateWord(c echo.Context) error {
 		}
 	}
 
-	// Update the word's difficulty in the global words collection if provided
-	if req.Difficulty != 0 {
+	// Update the word's global properties if provided
+	if req.Difficulty != 0 || req.PartOfSpeech != "" || req.RootWord != "" {
 		wordsCollection := mongodb.GetCollection("words")
 		if wordsCollection == nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -183,20 +171,29 @@ func UpdateWord(c echo.Context) error {
 			})
 		}
 
+		wordUpdateData := bson.M{
+			"updated_at": time.Now(),
+		}
+
+		if req.Difficulty != 0 {
+			wordUpdateData["difficulty"] = req.Difficulty
+		}
+		if req.PartOfSpeech != "" {
+			wordUpdateData["part_of_speech"] = req.PartOfSpeech
+		}
+		if req.RootWord != "" {
+			wordUpdateData["root_word"] = req.RootWord
+		}
+
 		_, err = wordsCollection.UpdateOne(
 			context.Background(),
 			bson.M{"_id": wordID},
-			bson.M{
-				"$set": bson.M{
-					"difficulty": req.Difficulty,
-					"updated_at": time.Now(),
-				},
-			},
+			bson.M{"$set": wordUpdateData},
 		)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "Failed to update word difficulty",
+				"error": "Failed to update word properties",
 			})
 		}
 	}
