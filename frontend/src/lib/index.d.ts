@@ -48,7 +48,7 @@ type News = {
   content: string;
   level: number;
   keywords: string[];
-  word_in_news: string[];
+  word_in_news?: string[];
   source: string[];
   audio_url?: string;
   audio_key?: string;

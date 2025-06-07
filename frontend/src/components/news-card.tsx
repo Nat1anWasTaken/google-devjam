@@ -51,14 +51,14 @@ export function NewsCard({ news }: NewsCardProps) {
           </div>
         )}
 
-        {news.word_in_news.length > 0 && (
+        {news.word_in_news && news.word_in_news.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Tag className="h-3 w-3" />
               <span>相關單字</span>
             </div>
             <div className="flex flex-wrap gap-1">
-              {news.word_in_news.map((word, index) => (
+              {news.word_in_news?.map((word, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {word}
                 </Badge>

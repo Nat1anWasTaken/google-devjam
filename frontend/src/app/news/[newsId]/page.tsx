@@ -194,7 +194,7 @@ export default function NewsPage() {
         )}
 
         {/* Related words section */}
-        {news.word_in_news.length > 0 && (
+        {news.word_in_news?.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Tag className="h-4 w-4" />
