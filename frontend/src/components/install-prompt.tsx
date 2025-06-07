@@ -98,7 +98,7 @@ export function InstallPrompt() {
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <CardDescription>獲取完整的應用體驗，離線訪問和更快的加載速度。</CardDescription>
+        <CardDescription>安裝 App 以獲得完整的使用體驗。</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         {isInstallable && deferredPrompt ? (
