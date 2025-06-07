@@ -160,11 +160,29 @@ export async function getUser(): Promise<User | null> {
 
   if (!response.ok) {
     if (response.status === 401) {
+      console.log("getUser: 401 Unauthorized - user not authenticated");
       return null; // User not authenticated
     }
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch user");
+
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch (parseError) {
+      console.error("getUser: Failed to parse error response:", parseError);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const error: ApiError = new Error(errorData.message || errorData.error || "Failed to fetch user");
+    error.fullResponse = errorData;
+    throw error;
   }
 
-  return ((await response.json()) as GetUserResponse).user as User;
+  try {
+    const responseData = await response.json();
+    console.log("getUser: Successfully fetched user data");
+    return (responseData as GetUserResponse).user as User;
+  } catch (parseError) {
+    console.error("getUser: Failed to parse success response:", parseError);
+    throw new Error("Invalid response format from server");
+  }
 }

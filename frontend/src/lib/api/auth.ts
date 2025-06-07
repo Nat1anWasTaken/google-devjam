@@ -40,6 +40,32 @@ export function logout(): void {
   // You can also call a backend logout endpoint here if needed
 }
 
+// Enhanced token validation
+export function isTokenValid(): boolean {
+  const token = getStoredToken();
+  if (!token) return false;
+
+  try {
+    // Basic JWT structure validation (header.payload.signature)
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+
+    // Try to decode the payload to check expiration
+    const payload = JSON.parse(atob(parts[1]));
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      console.log("Token expired, removing from storage");
+      removeStoredToken();
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Invalid token format:", error);
+    removeStoredToken();
+    return false;
+  }
+}
+
 export async function registerUser(userData: RegisterData): Promise<RegisterResponse> {
   const response = await fetch(`${baseUrl}/auth/register`, {
     credentials: "include",

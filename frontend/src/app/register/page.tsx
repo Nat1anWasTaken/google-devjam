@@ -11,15 +11,44 @@ export default function RegisterPage() {
 
   const mutation = useMutation({
     mutationFn: registerUser,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log("Registration successful:", data);
 
       if (data.token) {
         storeToken(data.token);
+        console.log("Token stored successfully");
       }
 
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      router.push("/");
+      try {
+        // Extract user data from register response (RegisterResponse extends User)
+        const { token, ...userData } = data;
+
+        // Pre-populate the query cache with user data
+        if (userData && Object.keys(userData).length > 0) {
+          queryClient.setQueryData(["currentUser"], userData);
+          console.log("User data pre-populated in cache");
+        }
+
+        // Invalidate and refetch to ensure fresh data
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+
+        // If we don't have meaningful user data in response, wait for refetch to complete
+        if (!userData || Object.keys(userData).length === 0) {
+          console.log("Waiting for user data to be fetched...");
+          await queryClient.refetchQueries({
+            queryKey: ["currentUser"],
+            type: "active"
+          });
+        }
+
+        console.log("Redirecting to vocabulary page");
+        // Direct redirect to vocabulary to avoid double redirect chain
+        router.push("/vocabulary");
+      } catch (error) {
+        console.error("Error during post-registration setup:", error);
+        // Still redirect even if cache operations fail
+        router.push("/vocabulary");
+      }
     },
     onError: (error) => {
       console.error("Registration failed:", error);
