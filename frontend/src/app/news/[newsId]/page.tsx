@@ -40,8 +40,7 @@ export default function NewsPage() {
 
   const wordInNews = news?.word_in_news || [];
 
-  const { wordsQuery, wordsToQuiz, updateFluencyMutation } =
-    useNewsVocabulary(wordInNews);
+  const { wordsQuery, wordsToQuiz } = useNewsVocabulary(wordInNews);
 
   if (loading) {
     return (
