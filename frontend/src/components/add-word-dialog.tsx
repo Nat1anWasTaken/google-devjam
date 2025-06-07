@@ -1,10 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +10,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createWord } from "@/lib/api/vocabulary";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 
 export function AddWordDialog() {
   const [open, setOpen] = useState(false);
@@ -26,7 +26,7 @@ export function AddWordDialog() {
     mutationFn: createWord,
     onSuccess: () => {
       // Invalidate and refetch vocabulary queries
-      queryClient.invalidateQueries({ queryKey: ['vocabulary'] });
+      queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
       setWord("");
       setOpen(false);
     },
@@ -76,17 +76,22 @@ export function AddWordDialog() {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={createWordMutation.isPending}
-            >
-              取消
-            </Button>
-            <Button type="submit" disabled={createWordMutation.isPending || !word.trim()}>
-              {createWordMutation.isPending ? "新增中..." : "新增"}
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={createWordMutation.isPending}
+              >
+                取消
+              </Button>
+              <Button
+                type="submit"
+                disabled={createWordMutation.isPending || !word.trim()}
+              >
+                {createWordMutation.isPending ? "新增中..." : "新增"}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
