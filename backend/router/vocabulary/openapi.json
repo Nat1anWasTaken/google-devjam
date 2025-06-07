@@ -1,0 +1,902 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Google DevJam Backend - Vocabulary API",
+    "description": "Vocabulary management endpoints for creating, reading, updating, and deleting words in user's vocabulary with learning progress tracking",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/vocabulary": {
+      "post": {
+        "tags": ["Vocabulary"],
+        "summary": "Create a new word",
+        "description": "Add a new word to the user's vocabulary. The word will be validated and translated using Gemini AI, then added to both global words collection and user's personal vocabulary.",
+        "operationId": "createWord",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWordRequest"
+              },
+              "example": {
+                "word": "hello"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Word successfully created and added to vocabulary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WordResponse"
+                },
+                "example": {
+                  "word": {
+                    "id": "1234567890123456789",
+                    "word": "hello",
+                    "definition": "你好",
+                    "difficulty": 2,
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or word validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  },
+                  "word_required": {
+                    "summary": "Word is required",
+                    "value": {
+                      "error": "Word is required"
+                    }
+                  },
+                  "word_empty": {
+                    "summary": "Word cannot be empty",
+                    "value": {
+                      "error": "Word cannot be empty"
+                    }
+                  },
+                  "invalid_word": {
+                    "summary": "Invalid word rejected by AI",
+                    "value": {
+                      "error": "Invalid word: This is not a real English word"
+                    }
+                  },
+                  "no_definition": {
+                    "summary": "Could not generate definition",
+                    "value": {
+                      "error": "Could not generate definition for this word"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Word already exists in user's vocabulary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word already exists in your vocabulary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "database_error": {
+                    "summary": "Database connection error",
+                    "value": {
+                      "error": "Database connection error"
+                    }
+                  },
+                  "gemini_error": {
+                    "summary": "AI validation failed",
+                    "value": {
+                      "error": "Failed to validate word: Gemini API error"
+                    }
+                  },
+                  "id_generation_error": {
+                    "summary": "ID generation failed",
+                    "value": {
+                      "error": "Failed to generate word ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Vocabulary"],
+        "summary": "Get user's vocabulary words",
+        "description": "Retrieve all words in the user's vocabulary with pagination, search, and filtering options",
+        "operationId": "getWords",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of words per page (default: 20, max: 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "example": 20
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search query to filter words by word text (case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "hello"
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "description": "Filter words by difficulty level (1-10)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "example": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Words retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWordsResponse"
+                },
+                "example": {
+                  "words": [
+                    {
+                      "id": "1234567890123456789",
+                      "word": "hello",
+                      "definition": "你好",
+                      "difficulty": 2,
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-15T10:30:00Z",
+                      "learn_count": 5,
+                      "fluency": 80
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "limit": 20
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Database connection error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vocabulary/{id}": {
+      "get": {
+        "tags": ["Vocabulary"],
+        "summary": "Get a specific word",
+        "description": "Retrieve a specific word from the user's vocabulary by word ID",
+        "operationId": "getWord",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Word retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WordResponse"
+                },
+                "example": {
+                  "word": {
+                    "id": "1234567890123456789",
+                    "word": "hello",
+                    "definition": "你好",
+                    "difficulty": 2,
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word ID is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Word not found in user's vocabulary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word not found in your vocabulary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Database connection error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Vocabulary"],
+        "summary": "Update word difficulty",
+        "description": "Update the difficulty level of a word in the user's vocabulary",
+        "operationId": "updateWord",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWordRequest"
+              },
+              "example": {
+                "difficulty": 5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Word updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "message": "Word updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "word_id_required": {
+                    "summary": "Word ID is required",
+                    "value": {
+                      "error": "Word ID is required"
+                    }
+                  },
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  },
+                  "invalid_difficulty": {
+                    "summary": "Invalid difficulty range",
+                    "value": {
+                      "error": "Difficulty must be between 1 and 10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Word not found in user's vocabulary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word not found in your vocabulary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to update word"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Vocabulary"],
+        "summary": "Delete a word from vocabulary",
+        "description": "Remove a word from the user's vocabulary (does not delete the word from global collection)",
+        "operationId": "deleteWord",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Word removed from vocabulary successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "message": "Word removed from vocabulary successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word ID is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Word not found in user's vocabulary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word not found in your vocabulary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to delete word from vocabulary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vocabulary/{id}/learn": {
+      "post": {
+        "tags": ["Learning"],
+        "summary": "Track learning progress",
+        "description": "Record a learning attempt for a word, updating learn count and fluency based on correctness",
+        "operationId": "learnWord",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearnWordRequest"
+              },
+              "example": {
+                "correct": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Learning progress updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearnWordResponse"
+                },
+                "example": {
+                  "message": "Learning progress updated",
+                  "learn_count": 6,
+                  "fluency": 90
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "word_id_required": {
+                    "summary": "Word ID is required",
+                    "value": {
+                      "error": "Word ID is required"
+                    }
+                  },
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Word not found in user's vocabulary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word not found in your vocabulary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to update learning progress"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateWordRequest": {
+        "type": "object",
+        "required": ["word"],
+        "properties": {
+          "word": {
+            "type": "string",
+            "description": "The English word to add to vocabulary (must be a valid base form word)",
+            "example": "hello",
+            "minLength": 1
+          }
+        }
+      },
+      "UpdateWordRequest": {
+        "type": "object",
+        "properties": {
+          "difficulty": {
+            "type": "integer",
+            "description": "Difficulty level of the word",
+            "minimum": 1,
+            "maximum": 10,
+            "example": 5
+          }
+        }
+      },
+      "LearnWordRequest": {
+        "type": "object",
+        "required": ["correct"],
+        "properties": {
+          "correct": {
+            "type": "boolean",
+            "description": "Whether the user answered correctly for this word",
+            "example": true
+          }
+        }
+      },
+      "Word": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique word identifier (Snowflake ID)",
+            "example": "1234567890123456789"
+          },
+          "word": {
+            "type": "string",
+            "description": "The English word",
+            "example": "hello"
+          },
+          "definition": {
+            "type": "string",
+            "description": "Traditional Chinese translation/definition",
+            "example": "你好"
+          },
+          "difficulty": {
+            "type": "integer",
+            "description": "Difficulty level (1-10)",
+            "minimum": 1,
+            "maximum": 10,
+            "example": 2
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Word creation timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          }
+        }
+      },
+      "WordWithUserData": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Word"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "learn_count": {
+                "type": "integer",
+                "description": "Number of times user has practiced this word",
+                "example": 5
+              },
+              "fluency": {
+                "type": "integer",
+                "description": "User's fluency level with this word (0-100)",
+                "minimum": 0,
+                "maximum": 100,
+                "example": 80
+              }
+            }
+          }
+        ]
+      },
+      "WordResponse": {
+        "type": "object",
+        "properties": {
+          "word": {
+            "$ref": "#/components/schemas/Word"
+          }
+        }
+      },
+      "GetWordsResponse": {
+        "type": "object",
+        "properties": {
+          "words": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WordWithUserData"
+            },
+            "description": "Array of words with user learning data"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of words in user's vocabulary",
+            "example": 50
+          },
+          "page": {
+            "type": "integer",
+            "description": "Current page number",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of words per page",
+            "example": 20
+          }
+        }
+      },
+      "LearnWordResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Learning progress updated"
+          },
+          "learn_count": {
+            "type": "integer",
+            "description": "Updated learn count",
+            "example": 6
+          },
+          "fluency": {
+            "type": "integer",
+            "description": "Updated fluency level",
+            "example": 90
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Operation completed successfully"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Invalid request format"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from authentication endpoint"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Vocabulary",
+      "description": "Vocabulary management endpoints for CRUD operations on words"
+    },
+    {
+      "name": "Learning",
+      "description": "Learning progress tracking endpoints"
+    }
+  ]
+} 
