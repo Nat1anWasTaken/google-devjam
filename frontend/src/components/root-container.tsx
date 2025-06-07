@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BottomNavigation } from "./bottom-navigation";
 import { DeviceNotSupported } from "./device-not-supported";
+import useAuth from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,8 @@ export function RootContainer({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useAuth();
+
   const [isClient, setIsClient] = useState(false);
   const [mobile, setMobile] = useState(false);
   const pathname = usePathname();
