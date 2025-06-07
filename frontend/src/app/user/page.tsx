@@ -165,12 +165,12 @@ export default function UserPage() {
                   {/* Level Display */}
                   <div
                     className={cn(
-                      "inline-flex items-center justify-center rounded-lg px-6 py-4 text-white font-bold text-3xl shadow-lg min-w-[160px] transition-all duration-300 transform",
+                      "inline-flex items-center justify-center rounded-lg px-6 py-4 text-foreground font-bold text-3xl shadow-lg min-w-[160px] transition-all duration-300 transform",
                       getDifficultyColor(level),
                       optimisticLevel && "scale-110"
                     )}
                   >
-                    {updateLevelMutation.isPending ? <LoaderCircle className="size-8 animate-spin text-muted-foreground" /> : "Level " + level}
+                    {updateLevelMutation.isPending ? <LoaderCircle className="size-8 animate-spin text-foreground" /> : "Level " + level}
                   </div>
 
                   {/* Increase Button */}
