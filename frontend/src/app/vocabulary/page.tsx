@@ -4,7 +4,6 @@ import { WordCard } from "@/components/word-card";
 import { WordCardSkeleton } from "@/components/word-card-skeleton";
 import { getWords } from "@/lib/api/vocabulary";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
 
 export default function VocabularyPage() {
   const query = useQuery({
