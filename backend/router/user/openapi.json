@@ -38,7 +38,7 @@
                   "preferences": {
                     "id": "1234567890123456789",
                     "user_id": "1234567890123456788",
-                    "level": "intermediate",
+                    "level": 5,
                     "interests": ["technology", "science", "travel"],
                     "created_at": "2024-01-15T10:30:00Z",
                     "updated_at": "2024-01-15T10:30:00Z"
@@ -106,7 +106,7 @@
                 "$ref": "#/components/schemas/CreatePreferencesRequest"
               },
               "example": {
-                "level": "intermediate",
+                "level": 5,
                 "interests": ["technology", "science", "travel"]
               }
             }
@@ -124,7 +124,7 @@
                   "preferences": {
                     "id": "1234567890123456789",
                     "user_id": "1234567890123456788",
-                    "level": "intermediate",
+                    "level": 5,
                     "interests": ["technology", "science", "travel"],
                     "created_at": "2024-01-15T10:30:00Z",
                     "updated_at": "2024-01-15T10:30:00Z"
@@ -156,7 +156,7 @@
                   "invalid_level": {
                     "summary": "Invalid level value",
                     "value": {
-                      "error": "Level must be one of: beginner, intermediate, advanced"
+                      "error": "Level must be between 1 and 10"
                     }
                   }
                 }
@@ -222,7 +222,7 @@
                 "$ref": "#/components/schemas/UpdatePreferencesRequest"
               },
               "example": {
-                "level": "advanced",
+                "level": 8,
                 "interests": ["technology", "science", "travel", "business"]
               }
             }
@@ -240,7 +240,7 @@
                   "preferences": {
                     "id": "1234567890123456789",
                     "user_id": "1234567890123456788",
-                    "level": "advanced",
+                    "level": 8,
                     "interests": ["technology", "science", "travel", "business"],
                     "created_at": "2024-01-15T10:30:00Z",
                     "updated_at": "2024-01-15T11:30:00Z"
@@ -266,7 +266,7 @@
                   "invalid_level": {
                     "summary": "Invalid level value",
                     "value": {
-                      "error": "Level must be one of: beginner, intermediate, advanced"
+                      "error": "Level must be between 1 and 10"
                     }
                   }
                 }
@@ -416,7 +416,7 @@
                   "preferences": {
                     "id": "1234567890123456789",
                     "user_id": "1234567890123456788",
-                    "level": "intermediate",
+                    "level": 5,
                     "interests": ["technology", "science", "travel", "music"],
                     "created_at": "2024-01-15T10:30:00Z",
                     "updated_at": "2024-01-15T11:30:00Z"
@@ -539,7 +539,7 @@
                   "preferences": {
                     "id": "1234567890123456789",
                     "user_id": "1234567890123456788",
-                    "level": "intermediate",
+                    "level": 5,
                     "interests": ["technology", "science", "travel"],
                     "created_at": "2024-01-15T10:30:00Z",
                     "updated_at": "2024-01-15T11:30:00Z"
@@ -622,10 +622,11 @@
         "required": ["level"],
         "properties": {
           "level": {
-            "type": "string",
-            "enum": ["beginner", "intermediate", "advanced"],
-            "description": "User's learning level",
-            "example": "intermediate"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "User's learning level (1-10)",
+            "example": 5
           },
           "interests": {
             "type": "array",
@@ -641,10 +642,11 @@
         "type": "object",
         "properties": {
           "level": {
-            "type": "string",
-            "enum": ["beginner", "intermediate", "advanced"],
-            "description": "User's learning level",
-            "example": "advanced"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "User's learning level (1-10)",
+            "example": 8
           },
           "interests": {
             "type": "array",
@@ -682,10 +684,11 @@
             "example": "1234567890123456788"
           },
           "level": {
-            "type": "string",
-            "enum": ["beginner", "intermediate", "advanced"],
-            "description": "User's learning level",
-            "example": "intermediate"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "User's learning level (1-10)",
+            "example": 5
           },
           "interests": {
             "type": "array",

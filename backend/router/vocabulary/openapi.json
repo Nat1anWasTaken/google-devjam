@@ -1092,6 +1092,231 @@
           }
         }
       }
+    },
+    "/vocabulary/recommend/{id}/add": {
+      "post": {
+        "tags": ["Recommendations"],
+        "summary": "Add recommended word to library",
+        "description": "Add a recommended word to the user's personal vocabulary library. This moves the word from recommendations to the user's active vocabulary and removes it from the recommendations list.",
+        "operationId": "addRecommendedWordToLibrary",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID of the recommended word",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Word successfully added to library",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "message": "Word added to library successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word ID is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recommended word not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Recommended word not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Word already exists in user's library",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word already exists in your library"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "database_error": {
+                    "summary": "Database connection error",
+                    "value": {
+                      "error": "Database connection error"
+                    }
+                  },
+                  "add_failed": {
+                    "summary": "Failed to add word to library",
+                    "value": {
+                      "error": "Failed to add word to library"
+                    }
+                  },
+                  "id_generation_error": {
+                    "summary": "Failed to generate ID",
+                    "value": {
+                      "error": "Failed to generate ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vocabulary/recommend/{id}": {
+      "delete": {
+        "tags": ["Recommendations"],
+        "summary": "Delete recommendation",
+        "description": "Remove a word from the user's recommendations without adding it to their library. This is useful when the user wants to dismiss a recommendation they're not interested in learning.",
+        "operationId": "deleteRecommendation",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Word ID of the recommended word to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1234567890123456789"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recommendation deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "message": "Recommendation deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Word ID is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recommendation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Recommendation not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "database_error": {
+                    "summary": "Database connection error",
+                    "value": {
+                      "error": "Database connection error"
+                    }
+                  },
+                  "delete_failed": {
+                    "summary": "Failed to delete recommendation",
+                    "value": {
+                      "error": "Failed to delete recommendation"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

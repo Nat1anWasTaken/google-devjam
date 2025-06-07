@@ -304,3 +304,159 @@ func getUserPreferences(userID string) (*model.UserPreferences, error) {
 
 	return &preferences, nil
 }
+
+// AddRecommendedWordToLibrary adds a recommended word to the user's library
+func AddRecommendedWordToLibrary(c echo.Context) error {
+	// Get user info from context
+	userID, _ := middleware.GetUserFromContext(c)
+	if userID == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "User not authenticated",
+		})
+	}
+
+	wordID := c.Param("id")
+	if wordID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Word ID is required",
+		})
+	}
+
+	// Check if the word exists in recommendations
+	recommendWordsCollection := mongodb.GetCollection("recommend_words")
+	if recommendWordsCollection == nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Database connection error",
+		})
+	}
+
+	var recommendWord model.RecommendWord
+	err := recommendWordsCollection.FindOne(context.Background(), bson.M{
+		"user_id": userID,
+		"word_id": wordID,
+	}).Decode(&recommendWord)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.JSON(http.StatusNotFound, map[string]string{
+				"error": "Recommended word not found",
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Database error",
+		})
+	}
+
+	// Check if user already has this word in their library
+	userWordsCollection := mongodb.GetCollection("user_words")
+	if userWordsCollection == nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Database connection error",
+		})
+	}
+
+	var existingUserWord model.UserWord
+	err = userWordsCollection.FindOne(context.Background(), bson.M{
+		"user_id": userID,
+		"word_id": wordID,
+	}).Decode(&existingUserWord)
+
+	if err == nil {
+		return c.JSON(http.StatusConflict, map[string]string{
+			"error": "Word already exists in your library",
+		})
+	} else if err != mongo.ErrNoDocuments {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Database error",
+		})
+	}
+
+	// Generate user word ID
+	userWordID, err := encrypt.GenerateSnowflakeID()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to generate ID",
+		})
+	}
+
+	// Add word to user's library
+	now := time.Now()
+	userWord := model.UserWord{
+		ID:         userWordID,
+		UserID:     userID,
+		WordID:     wordID,
+		LearnCount: 0,
+		Fluency:    0,
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}
+
+	_, err = userWordsCollection.InsertOne(context.Background(), userWord)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to add word to library",
+		})
+	}
+
+	// Remove from recommendations
+	_, err = recommendWordsCollection.DeleteOne(context.Background(), bson.M{
+		"user_id": userID,
+		"word_id": wordID,
+	})
+	if err != nil {
+		// Log error but don't fail the request since the word was successfully added
+		// The recommendation will remain but that's not critical
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{
+		"message": "Word added to library successfully",
+	})
+}
+
+// DeleteRecommendation removes a word from the user's recommendations
+func DeleteRecommendation(c echo.Context) error {
+	// Get user info from context
+	userID, _ := middleware.GetUserFromContext(c)
+	if userID == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "User not authenticated",
+		})
+	}
+
+	wordID := c.Param("id")
+	if wordID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Word ID is required",
+		})
+	}
+
+	// Get recommend words collection
+	recommendWordsCollection := mongodb.GetCollection("recommend_words")
+	if recommendWordsCollection == nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Database connection error",
+		})
+	}
+
+	// Delete the recommendation
+	result, err := recommendWordsCollection.DeleteOne(context.Background(), bson.M{
+		"user_id": userID,
+		"word_id": wordID,
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to delete recommendation",
+		})
+	}
+
+	if result.DeletedCount == 0 {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Recommendation not found",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Recommendation deleted successfully",
+	})
+}

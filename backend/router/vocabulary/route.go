@@ -25,4 +25,8 @@ func InitRoutes(e *echo.Echo) {
 
 	// Recommendation endpoint
 	v.GET("/recommend", GetRecommendations) // GET /vocabulary/recommend - Get word recommendations
+
+	// Recommendation management endpoints
+	v.POST("/recommend/:id/add", AddRecommendedWordToLibrary) // POST /vocabulary/recommend/:id/add - Add recommended word to library
+	v.DELETE("/recommend/:id", DeleteRecommendation)          // DELETE /vocabulary/recommend/:id - Delete recommendation
 }

@@ -17,12 +17,12 @@ import (
 )
 
 type CreatePreferencesRequest struct {
-	Level     string   `json:"level" validate:"required"`
+	Level     int      `json:"level" validate:"required"`
 	Interests []string `json:"interests"`
 }
 
 type UpdatePreferencesRequest struct {
-	Level     string   `json:"level,omitempty"`
+	Level     *int     `json:"level,omitempty"`
 	Interests []string `json:"interests,omitempty"`
 }
 
@@ -84,26 +84,10 @@ func CreatePreferences(c echo.Context) error {
 		})
 	}
 
-	// Validate request
-	if strings.TrimSpace(req.Level) == "" {
+	// Validate level (1-10)
+	if req.Level < 1 || req.Level > 10 {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Level is required",
-		})
-	}
-
-	// Validate level
-	validLevels := []string{"beginner", "intermediate", "advanced"}
-	levelValid := false
-	normalizedLevel := strings.ToLower(strings.TrimSpace(req.Level))
-	for _, validLevel := range validLevels {
-		if normalizedLevel == validLevel {
-			levelValid = true
-			break
-		}
-	}
-	if !levelValid {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Level must be one of: beginner, intermediate, advanced",
+			"error": "Level must be between 1 and 10",
 		})
 	}
 
@@ -150,7 +134,7 @@ func CreatePreferences(c echo.Context) error {
 	preferences := model.UserPreferences{
 		ID:        preferencesID,
 		UserID:    userID,
-		Level:     normalizedLevel,
+		Level:     req.Level,
 		Interests: cleanInterests,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -214,22 +198,13 @@ func UpdatePreferences(c echo.Context) error {
 	}
 
 	// Update level if provided
-	if req.Level != "" {
-		normalizedLevel := strings.ToLower(strings.TrimSpace(req.Level))
-		validLevels := []string{"beginner", "intermediate", "advanced"}
-		levelValid := false
-		for _, validLevel := range validLevels {
-			if normalizedLevel == validLevel {
-				levelValid = true
-				break
-			}
-		}
-		if !levelValid {
+	if req.Level != nil {
+		if *req.Level < 1 || *req.Level > 10 {
 			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Level must be one of: beginner, intermediate, advanced",
+				"error": "Level must be between 1 and 10",
 			})
 		}
-		updateData["level"] = normalizedLevel
+		updateData["level"] = *req.Level
 	}
 
 	// Update interests if provided
