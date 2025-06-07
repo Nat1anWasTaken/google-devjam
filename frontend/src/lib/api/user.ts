@@ -67,7 +67,7 @@ export async function getUserPreferencesWithAutoCreate(): Promise<PreferencesRes
         // Create default preferences
         const defaultPreferences: CreatePreferencesRequest = {
           level: 1, // Start with beginner level
-          interests: [] // Empty interests array, user can add later
+          interests: ["technology", "SDGs", "social"] // Empty interests array, user can add later
         };
 
         // Create and return the new preferences
