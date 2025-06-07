@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BottomNavigation } from "./bottom-navigation";
 import { DeviceNotSupported } from "./device-not-supported";
+import { InstallPrompt } from "./install-prompt";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ export function RootContainer({
       <div className="h-screen flex flex-col">
         <main className="flex-grow h-0 pb-16">{children}</main>
         {shouldShowBottomNav && <BottomNavigation />}
+        <InstallPrompt />
       </div>
     </QueryClientProvider>
   ) : (
