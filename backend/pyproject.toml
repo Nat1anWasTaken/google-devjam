@@ -3,7 +3,7 @@ name = "neural-tts-server"
 version = "1.0.0"
 description = "Advanced Neural TTS Server using Coqui TTS"
 readme = "README.md"
-requires-python = ">=3.8,<3.12"
+requires-python = ">=3.9,<3.12"
 dependencies = [
     "flask",
     "torch",
