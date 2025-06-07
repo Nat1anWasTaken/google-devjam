@@ -14,7 +14,6 @@ export default function LoginPage() {
     onSuccess: (data) => {
       console.log("Login successful:", data);
 
-      // Store token in localStorage if present
       if (data.token) {
         storeToken(data.token);
       }

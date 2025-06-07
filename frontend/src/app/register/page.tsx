@@ -14,7 +14,6 @@ export default function RegisterPage() {
     onSuccess: (data) => {
       console.log("Registration successful:", data);
 
-      // Store token in localStorage if present
       if (data.token) {
         storeToken(data.token);
       }
