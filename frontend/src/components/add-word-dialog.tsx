@@ -1,15 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createWord } from "@/lib/api/vocabulary";
@@ -33,7 +25,7 @@ export function AddWordDialog() {
     onError: (error) => {
       console.error("Failed to create word:", error);
       // TODO: Add proper error handling/toast notification
-    },
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,30 +57,15 @@ export function AddWordDialog() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="word">單字</Label>
-              <Input
-                id="word"
-                value={word}
-                onChange={(e) => setWord(e.target.value)}
-                placeholder="輸入單字..."
-                disabled={createWordMutation.isPending}
-                autoFocus
-              />
+              <Input id="word" value={word} onChange={(e) => setWord(e.target.value)} placeholder="輸入單字..." disabled={createWordMutation.isPending} autoFocus />
             </div>
           </div>
           <DialogFooter>
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={createWordMutation.isPending}
-              >
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={createWordMutation.isPending}>
                 取消
               </Button>
-              <Button
-                type="submit"
-                disabled={createWordMutation.isPending || !word.trim()}
-              >
+              <Button type="submit" disabled={createWordMutation.isPending || !word.trim()}>
                 {createWordMutation.isPending ? "新增中..." : "新增"}
               </Button>
             </div>

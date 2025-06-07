@@ -6,11 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddInterestsDialog } from "@/components/add-interests-dialog";
 import useAuth from "@/hooks/use-auth";
-import {
-  getUserPreferences,
-  removeInterest,
-  updateUserPreferences,
-} from "@/lib/api/user";
+import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
 import { cn, getDifficultyColor, getGravatarUrlSync } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Mail, User, X } from "lucide-react";
@@ -27,11 +23,11 @@ export default function UserPage() {
   const {
     data: preferencesData,
     isLoading: preferencesLoading,
-    error: preferencesError,
+    error: preferencesError
   } = useQuery({
     queryKey: ["userPreferences"],
     queryFn: getUserPreferences,
-    enabled: !!user,
+    enabled: !!user
   });
 
   // Remove interest mutation
@@ -42,19 +38,18 @@ export default function UserPage() {
     },
     onError: (error) => {
       console.error("Failed to remove interest:", error);
-    },
+    }
   });
 
   // Update difficulty level mutation
   const updateLevelMutation = useMutation({
-    mutationFn: (newLevel: number) =>
-      updateUserPreferences({ level: newLevel }),
+    mutationFn: (newLevel: number) => updateUserPreferences({ level: newLevel }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userPreferences"] });
     },
     onError: (error) => {
       console.error("Failed to update difficulty level:", error);
-    },
+    }
   });
 
   // Generate avatar URL when user is available
@@ -95,9 +90,7 @@ export default function UserPage() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center">
             <h1 className="text-2xl font-bold">請先登入</h1>
-            <p className="text-muted-foreground mt-2">
-              您需要登入才能查看用戶資訊
-            </p>
+            <p className="text-muted-foreground mt-2">您需要登入才能查看用戶資訊</p>
           </div>
         </div>
       </div>
@@ -118,10 +111,7 @@ export default function UserPage() {
               {/* Avatar */}
               <div className="relative">
                 <Image
-                  src={
-                    avatarUrl ||
-                    `https://www.gravatar.com/avatar/default?s=120&d=mp`
-                  }
+                  src={avatarUrl || `https://www.gravatar.com/avatar/default?s=120&d=mp`}
                   alt={`${user.display_name} 的頭像`}
                   width={96}
                   height={96}
@@ -165,35 +155,18 @@ export default function UserPage() {
                 {/* Level Display with Arrow Controls */}
                 <div className="flex items-center justify-center gap-4">
                   {/* Decrease Button */}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleLevelChange("decrease")}
-                    disabled={level <= 1 || updateLevelMutation.isPending}
-                    className="h-12 w-12"
-                  >
+                  <Button variant="outline" size="icon" onClick={() => handleLevelChange("decrease")} disabled={level <= 1 || updateLevelMutation.isPending} className="h-12 w-12">
                     <ChevronLeft className="size-5" />
                     <span className="sr-only">降低難度等級</span>
                   </Button>
 
                   {/* Level Display */}
-                  <div
-                    className={cn(
-                      "inline-flex items-center justify-center rounded-lg px-6 py-4 text-white font-bold text-3xl shadow-lg min-w-[160px]",
-                      getDifficultyColor(level)
-                    )}
-                  >
+                  <div className={cn("inline-flex items-center justify-center rounded-lg px-6 py-4 text-white font-bold text-3xl shadow-lg min-w-[160px]", getDifficultyColor(level))}>
                     Level {level}
                   </div>
 
                   {/* Increase Button */}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleLevelChange("increase")}
-                    disabled={level >= 10 || updateLevelMutation.isPending}
-                    className="h-12 w-12"
-                  >
+                  <Button variant="outline" size="icon" onClick={() => handleLevelChange("increase")} disabled={level >= 10 || updateLevelMutation.isPending} className="h-12 w-12">
                     <ChevronRight className="size-5" />
                     <span className="sr-only">提高難度等級</span>
                   </Button>
@@ -208,9 +181,7 @@ export default function UserPage() {
                 </p>
 
                 {/* Helper Text */}
-                <p className="text-xs text-muted-foreground">
-                  使用左右箭頭調整您的學習難度等級 (1-10)
-                </p>
+                <p className="text-xs text-muted-foreground">使用左右箭頭調整您的學習難度等級 (1-10)</p>
               </div>
             )}
           </CardContent>
@@ -235,19 +206,9 @@ export default function UserPage() {
             ) : interests.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {interests.map((interest: string) => (
-                  <Badge
-                    key={interest}
-                    variant="secondary"
-                    className="text-sm px-3 py-1 flex items-center gap-2"
-                  >
+                  <Badge key={interest} variant="secondary" className="text-sm px-3 py-1 flex items-center gap-2">
                     {interest}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto p-0 hover:bg-transparent"
-                      onClick={() => handleRemoveInterest(interest)}
-                      disabled={removeInterestMutation.isPending}
-                    >
+                    <Button variant="ghost" size="sm" className="h-auto p-0 hover:bg-transparent" onClick={() => handleRemoveInterest(interest)} disabled={removeInterestMutation.isPending}>
                       <X className="size-3" />
                       <span className="sr-only">移除 {interest}</span>
                     </Button>

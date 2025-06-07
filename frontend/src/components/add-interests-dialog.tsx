@@ -1,15 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { addInterest } from "@/lib/api/user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -20,9 +12,7 @@ interface AddInterestsDialogProps {
   currentInterests: string[];
 }
 
-export function AddInterestsDialog({
-  currentInterests,
-}: AddInterestsDialogProps) {
+export function AddInterestsDialog({ currentInterests }: AddInterestsDialogProps) {
   const [open, setOpen] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -37,7 +27,7 @@ export function AddInterestsDialog({
     onError: (error) => {
       console.error("Failed to add interest:", error);
       // TODO: Add proper error handling/toast notification
-    },
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,9 +66,7 @@ export function AddInterestsDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>新增興趣</DialogTitle>
-            <DialogDescription>
-              輸入您感興趣的主題，這將幫助我們為您推薦更適合的內容
-            </DialogDescription>
+            <DialogDescription>輸入您感興趣的主題，這將幫助我們為您推薦更適合的內容</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -96,25 +84,15 @@ export function AddInterestsDialog({
                 allowDuplicates={false}
                 sortTags
               />
-              <p className="text-xs text-muted-foreground">
-                按 Enter 鍵或逗號來新增興趣標籤
-              </p>
+              <p className="text-xs text-muted-foreground">按 Enter 鍵或逗號來新增興趣標籤</p>
             </div>
           </div>
           <DialogFooter>
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={addInterestMutation.isPending}
-              >
+              <Button type="button" variant="outline" onClick={handleCancel} disabled={addInterestMutation.isPending}>
                 取消
               </Button>
-              <Button
-                type="submit"
-                disabled={addInterestMutation.isPending || tags.length === 0}
-              >
+              <Button type="submit" disabled={addInterestMutation.isPending || tags.length === 0}>
                 {addInterestMutation.isPending ? "新增中..." : "新增"}
               </Button>
             </div>

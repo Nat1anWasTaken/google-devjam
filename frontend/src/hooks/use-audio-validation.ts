@@ -18,7 +18,7 @@ export const useAudioValidation = (audioUrl: string, newsId: string) => {
     queryFn: async (): Promise<AudioValidationData> => {
       const response = await fetch(audioUrl, {
         method: "HEAD",
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(10000)
       });
 
       if (!response.ok) {
@@ -32,7 +32,7 @@ export const useAudioValidation = (audioUrl: string, newsId: string) => {
         contentLength: response.headers.get("content-length"),
         lastModified: response.headers.get("last-modified"),
         isValid: true,
-        validatedAt: new Date().toISOString(),
+        validatedAt: new Date().toISOString()
       };
     },
     enabled: !!audioUrl && !!newsId && typeof audioUrl === "string",
@@ -40,6 +40,6 @@ export const useAudioValidation = (audioUrl: string, newsId: string) => {
     retryDelay: 1000,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
-    throwOnError: false,
+    throwOnError: false
   });
 };

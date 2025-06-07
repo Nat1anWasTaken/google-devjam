@@ -57,14 +57,12 @@ export async function generateNews(): Promise<GenerateNewsResponse> {
   const response = await fetch(`${baseUrl}/news/generate`, {
     credentials: "include",
     method: "POST",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to generate news"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to generate news");
     error.fullResponse = errorData;
     throw error;
   }
@@ -77,14 +75,12 @@ export async function forceGenerateNews(): Promise<GenerateNewsResponse> {
   const response = await fetch(`${baseUrl}/news/force-generate`, {
     credentials: "include",
     method: "POST",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to force generate news"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to force generate news");
     error.fullResponse = errorData;
     throw error;
   }
@@ -93,15 +89,13 @@ export async function forceGenerateNews(): Promise<GenerateNewsResponse> {
   return responseData;
 }
 
-export async function getNews(
-  params?: GetNewsParams
-): Promise<GetNewsResponse> {
+export async function getNews(params?: GetNewsParams): Promise<GetNewsResponse> {
   const queryString = params ? buildQueryString(params) : "";
 
   const response = await fetch(`${baseUrl}/news${queryString}`, {
     credentials: "include",
     method: "GET",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
@@ -115,13 +109,11 @@ export async function getNews(
   return responseData;
 }
 
-export async function getSingleNews(
-  id: string
-): Promise<GetSingleNewsResponse> {
+export async function getSingleNews(id: string): Promise<GetSingleNewsResponse> {
   const response = await fetch(`${baseUrl}/news/${id}`, {
     credentials: "include",
     method: "GET",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {

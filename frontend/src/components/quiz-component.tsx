@@ -13,24 +13,17 @@ interface QuizComponentProps {
   onRemove?: (wordId: string) => void;
 }
 
-export function QuizComponent({
-  word,
-  onComplete,
-  onRemove,
-}: QuizComponentProps) {
+export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps) {
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [animationDirection, setAnimationDirection] = useState<
-    "left" | "right" | null
-  >(null);
+  const [animationDirection, setAnimationDirection] = useState<"left" | "right" | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
   const currentX = useRef(0);
 
   const learnWordMutation = useMutation({
-    mutationFn: ({ correct }: { correct: boolean }) =>
-      learnWord(word.id, { correct }),
+    mutationFn: ({ correct }: { correct: boolean }) => learnWord(word.id, { correct }),
     onSuccess: (response) => {
       // Call onComplete with the new fluency
       onComplete?.(response.fluency);
@@ -44,7 +37,7 @@ export function QuizComponent({
       setIsAnimating(false);
       setAnimationDirection(null);
       setDragX(0);
-    },
+    }
   });
 
   // 觸發答題動畫
@@ -53,8 +46,7 @@ export function QuizComponent({
     setAnimationDirection(direction);
 
     // 計算最終位置（完全移出螢幕）
-    const finalX =
-      direction === "left" ? -window.innerWidth : window.innerWidth;
+    const finalX = direction === "left" ? -window.innerWidth : window.innerWidth;
     setDragX(finalX);
 
     // 動畫結束後觸發API呼叫
@@ -147,18 +139,18 @@ export function QuizComponent({
       // 右滑 - 綠色背景 (Yes)
       return {
         className: "bg-green-500",
-        style: { opacity },
+        style: { opacity }
       };
     } else if (dragX < 0) {
       // 左滑 - 紅色背景 (No)
       return {
         className: "bg-red-500",
-        style: { opacity },
+        style: { opacity }
       };
     }
     return {
       className: "",
-      style: { opacity: 0 },
+      style: { opacity: 0 }
     };
   };
 
@@ -167,10 +159,7 @@ export function QuizComponent({
   return (
     <div className="relative overflow-hidden rounded-lg">
       {/* 背景指示器 */}
-      <div
-        className={`absolute inset-0 flex items-center justify-center rounded-lg ${swipeStyle.className}`}
-        style={swipeStyle.style}
-      >
+      <div className={`absolute inset-0 flex items-center justify-center rounded-lg ${swipeStyle.className}`} style={swipeStyle.style}>
         {dragX > 50 && !isAnimating && <Check className="w-8 h-8 text-white" />}
         {dragX < -50 && !isAnimating && <X className="w-8 h-8 text-white" />}
         {isAnimating && animationDirection === "right" && (
@@ -190,13 +179,9 @@ export function QuizComponent({
       {/* 卡片內容 */}
       <Card
         ref={cardRef}
-        className={`w-full max-w-md mx-auto cursor-grab active:cursor-grabbing ${
-          isAnimating
-            ? "transition-transform duration-300 ease-out"
-            : "transition-transform duration-200 ease-out"
-        }`}
+        className={`w-full max-w-md mx-auto cursor-grab active:cursor-grabbing ${isAnimating ? "transition-transform duration-300 ease-out" : "transition-transform duration-200 ease-out"}`}
         style={{
-          transform: `translateX(${dragX}px)`,
+          transform: `translateX(${dragX}px)`
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -212,9 +197,7 @@ export function QuizComponent({
               <h2 className="text-lg font-semibold">{word.word}</h2>
               <h2 className="text-muted-foreground">{word.translation}</h2>
             </div>
-            <p className="text-base text-muted-foreground">
-              你知道這個字是什麼意思了嗎？
-            </p>
+            <p className="text-base text-muted-foreground">你知道這個字是什麼意思了嗎？</p>
           </div>
         </CardContent>
       </Card>

@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -25,23 +19,17 @@ interface LoginFormProps extends Omit<React.ComponentProps<"div">, "onSubmit"> {
   error?: string;
 }
 
-export function LoginForm({
-  className,
-  onSubmit,
-  isSubmitting,
-  error,
-  ...props
-}: LoginFormProps) {
+export function LoginForm({ className, onSubmit, isSubmitting, error, ...props }: LoginFormProps) {
   const [formData, setFormData] = useState<LoginData>({
     email: "",
-    password: "",
+    password: ""
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
@@ -64,34 +52,16 @@ export function LoginForm({
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
+                <Input id="email" name="email" type="email" placeholder="m@example.com" value={formData.email} onChange={handleInputChange} required />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">密碼</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
+                  <a href="#" className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
                     忘記密碼？
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                />
+                <Input id="password" name="password" type="password" value={formData.password} onChange={handleInputChange} required />
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -99,9 +69,7 @@ export function LoginForm({
               </Button>
               {error && (
                 <div className="text-sm text-red-500 text-center">
-                  <pre className="whitespace-pre-wrap text-left bg-red-50 p-2 rounded border overflow-auto max-h-32">
-                    {error}
-                  </pre>
+                  <pre className="whitespace-pre-wrap text-left bg-red-50 p-2 rounded border overflow-auto max-h-32">{error}</pre>
                 </div>
               )}
             </div>

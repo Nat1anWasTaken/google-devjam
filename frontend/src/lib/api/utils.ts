@@ -5,7 +5,7 @@ import { getStoredToken } from "./auth";
 export function createAuthHeaders(): HeadersInit {
   const token = getStoredToken();
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
+    "Content-Type": "application/json"
   };
 
   if (token) {

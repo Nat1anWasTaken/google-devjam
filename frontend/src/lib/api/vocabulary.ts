@@ -91,21 +91,17 @@ function buildQueryString(params: GetWordsParams): string {
   return queryString ? `?${queryString}` : "";
 }
 
-export async function createWord(
-  data: CreateWordRequest
-): Promise<WordResponse> {
+export async function createWord(data: CreateWordRequest): Promise<WordResponse> {
   const response = await fetch(`${baseUrl}/vocabulary`, {
     credentials: "include",
     method: "POST",
     headers: createAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to create word"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to create word");
     error.fullResponse = errorData;
     throw error;
   }
@@ -114,15 +110,13 @@ export async function createWord(
   return responseData;
 }
 
-export async function getWords(
-  params?: GetWordsParams
-): Promise<GetWordsResponse> {
+export async function getWords(params?: GetWordsParams): Promise<GetWordsResponse> {
   const queryString = params ? buildQueryString(params) : "";
 
   const response = await fetch(`${baseUrl}/vocabulary${queryString}`, {
     credentials: "include",
     method: "GET",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
@@ -140,7 +134,7 @@ export async function getWord(id: string): Promise<WordWithUserDataResponse> {
   const response = await fetch(`${baseUrl}/vocabulary/${id}`, {
     credentials: "include",
     method: "GET",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
@@ -154,22 +148,17 @@ export async function getWord(id: string): Promise<WordWithUserDataResponse> {
   return responseData;
 }
 
-export async function updateWord(
-  id: string,
-  data: UpdateWordRequest
-): Promise<SuccessResponse> {
+export async function updateWord(id: string, data: UpdateWordRequest): Promise<SuccessResponse> {
   const response = await fetch(`${baseUrl}/vocabulary/${id}`, {
     credentials: "include",
     method: "PUT",
     headers: createAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to update word"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to update word");
     error.fullResponse = errorData;
     throw error;
   }
@@ -182,14 +171,12 @@ export async function deleteWord(id: string): Promise<SuccessResponse> {
   const response = await fetch(`${baseUrl}/vocabulary/${id}`, {
     credentials: "include",
     method: "DELETE",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to delete word"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to delete word");
     error.fullResponse = errorData;
     throw error;
   }
@@ -198,22 +185,17 @@ export async function deleteWord(id: string): Promise<SuccessResponse> {
   return responseData;
 }
 
-export async function learnWord(
-  id: string,
-  data: LearnWordRequest
-): Promise<LearnWordResponse> {
+export async function learnWord(id: string, data: LearnWordRequest): Promise<LearnWordResponse> {
   const response = await fetch(`${baseUrl}/vocabulary/${id}/learn`, {
     credentials: "include",
     method: "POST",
     headers: createAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to update learning progress"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to update learning progress");
     error.fullResponse = errorData;
     throw error;
   }
@@ -222,22 +204,17 @@ export async function learnWord(
   return responseData;
 }
 
-export async function addExample(
-  wordId: string,
-  data: AddExampleRequest
-): Promise<AddExampleResponse> {
+export async function addExample(wordId: string, data: AddExampleRequest): Promise<AddExampleResponse> {
   const response = await fetch(`${baseUrl}/vocabulary/${wordId}/examples`, {
     credentials: "include",
     method: "POST",
     headers: createAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to add example"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to add example");
     error.fullResponse = errorData;
     throw error;
   }
@@ -246,24 +223,16 @@ export async function addExample(
   return responseData;
 }
 
-export async function deleteExample(
-  wordId: string,
-  exampleId: string
-): Promise<SuccessResponse> {
-  const response = await fetch(
-    `${baseUrl}/vocabulary/${wordId}/examples/${exampleId}`,
-    {
-      credentials: "include",
-      method: "DELETE",
-      headers: createAuthHeaders(),
-    }
-  );
+export async function deleteExample(wordId: string, exampleId: string): Promise<SuccessResponse> {
+  const response = await fetch(`${baseUrl}/vocabulary/${wordId}/examples/${exampleId}`, {
+    credentials: "include",
+    method: "DELETE",
+    headers: createAuthHeaders()
+  });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to delete example"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to delete example");
     error.fullResponse = errorData;
     throw error;
   }
@@ -276,14 +245,12 @@ export async function getRecommendations(): Promise<RecommendResponse> {
   const response = await fetch(`${baseUrl}/vocabulary/recommend`, {
     credentials: "include",
     method: "GET",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to get recommendations"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to get recommendations");
     error.fullResponse = errorData;
     throw error;
   }

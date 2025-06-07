@@ -10,14 +10,8 @@ export function NewsLoadingAnimation() {
         </div>
         {/* Animated dots around the news icon */}
         <div className="absolute -top-2 -right-2 w-4 h-4 bg-primary/70 rounded-full animate-bounce"></div>
-        <div
-          className="absolute -bottom-2 -left-2 w-3 h-3 bg-primary/60 rounded-full animate-bounce"
-          style={{ animationDelay: "0.2s" }}
-        ></div>
-        <div
-          className="absolute top-1/2 -left-4 w-2 h-2 bg-primary/50 rounded-full animate-bounce"
-          style={{ animationDelay: "0.4s" }}
-        ></div>
+        <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+        <div className="absolute top-1/2 -left-4 w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
       </div>
 
       <h3 className="text-xl font-semibold mb-2">正在為你生成個人化新聞...</h3>
@@ -27,17 +21,11 @@ export function NewsLoadingAnimation() {
           <span>分析你的興趣和學習進度</span>
         </div>
         <div className="flex items-center gap-2">
-          <div
-            className="w-2 h-2 bg-primary/80 rounded-full animate-pulse"
-            style={{ animationDelay: "0.5s" }}
-          ></div>
+          <div className="w-2 h-2 bg-primary/80 rounded-full animate-pulse" style={{ animationDelay: "0.5s" }}></div>
           <span>搜集相關新聞資訊</span>
         </div>
         <div className="flex items-center gap-2">
-          <div
-            className="w-2 h-2 bg-primary/60 rounded-full animate-pulse"
-            style={{ animationDelay: "1s" }}
-          ></div>
+          <div className="w-2 h-2 bg-primary/60 rounded-full animate-pulse" style={{ animationDelay: "1s" }}></div>
           <span>AI 正在生成個人化內容</span>
         </div>
       </div>
@@ -49,9 +37,7 @@ export function NewsLoadingAnimation() {
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground mt-4">
-        這可能需要幾秒鐘時間...
-      </p>
+      <p className="text-xs text-muted-foreground mt-4">這可能需要幾秒鐘時間...</p>
     </div>
   );
 }

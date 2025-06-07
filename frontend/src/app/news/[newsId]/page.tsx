@@ -8,15 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeftIcon,
-  Calendar,
-  ExternalLink,
-  PartyPopper,
-  Swords,
-  Tag,
-  VolumeOff,
-} from "lucide-react";
+import { ArrowLeftIcon, Calendar, ExternalLink, PartyPopper, Swords, Tag, VolumeOff } from "lucide-react";
 import Markdown from "react-markdown";
 import { mapLevelToDifficulty } from "@/lib/utils";
 import { DifficultyBadge } from "@/components/difficulty-badge";
@@ -31,18 +23,16 @@ export default function NewsPage() {
   const newsId = params.newsId as string;
 
   // State to track completed/removed quizzes
-  const [completedQuizzes, setCompletedQuizzes] = useState<Set<string>>(
-    new Set()
-  );
+  const [completedQuizzes, setCompletedQuizzes] = useState<Set<string>>(new Set());
 
   const {
     data: newsResponse,
     isLoading: loading,
-    error,
+    error
   } = useQuery({
     queryKey: ["news", newsId],
     queryFn: () => getSingleNews(newsId),
-    enabled: !!newsId,
+    enabled: !!newsId
   });
 
   const news = newsResponse?.news;
@@ -52,9 +42,7 @@ export default function NewsPage() {
   const { wordsQuery, wordsToQuiz } = useNewsVocabulary(wordInNews);
 
   // Filter out completed quizzes
-  const remainingQuizzes = wordsToQuiz.filter(
-    (word) => !completedQuizzes.has(word.id)
-  );
+  const remainingQuizzes = wordsToQuiz.filter((word) => !completedQuizzes.has(word.id));
 
   // Handle quiz removal
   const handleQuizRemove = (wordId: string) => {
@@ -67,12 +55,7 @@ export default function NewsPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Navigation button skeleton */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/news")}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
+            <Button variant="ghost" size="sm" onClick={() => router.push("/news")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
               <ArrowLeftIcon className="h-4 w-4" />
               返回新聞列表
             </Button>
@@ -114,21 +97,14 @@ export default function NewsPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Navigation button */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/news")}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
+            <Button variant="ghost" size="sm" onClick={() => router.push("/news")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
               <ArrowLeftIcon className="h-4 w-4" />
               返回新聞列表
             </Button>
           </div>
 
           <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              {error?.message || "無法載入新聞內容"}
-            </p>
+            <p className="text-muted-foreground">{error?.message || "無法載入新聞內容"}</p>
           </div>
         </div>
       </div>
@@ -140,12 +116,7 @@ export default function NewsPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Navigation button */}
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/news")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.push("/news")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
             <ArrowLeftIcon className="h-4 w-4" />
             返回新聞列表
           </Button>
@@ -153,9 +124,7 @@ export default function NewsPage() {
 
         {/* Title and level */}
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold leading-tight">
-            {news.title}
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold leading-tight">{news.title}</h1>
           <DifficultyBadge difficulty={mapLevelToDifficulty(news.level)} />
         </div>
 
@@ -182,28 +151,18 @@ export default function NewsPage() {
         <div className="flex items-center gap-2 text-sm font-semibold">
           <Swords className="h-4 w-4" />
           <span>牛刀小試</span>
-          <span className="text-muted-foreground">
-            （右滑知道、左滑不知道）
-          </span>
+          <span className="text-muted-foreground">（右滑知道、左滑不知道）</span>
         </div>
         {wordsQuery.isLoading ? (
           <QuizComponentSkeleton />
         ) : (
           <div className="space-y-4">
             {remainingQuizzes.length > 0 ? (
-              remainingQuizzes.map((word) => (
-                <QuizComponent
-                  key={word.id}
-                  word={word}
-                  onRemove={handleQuizRemove}
-                />
-              ))
+              remainingQuizzes.map((word) => <QuizComponent key={word.id} word={word} onRemove={handleQuizRemove} />)
             ) : wordsToQuiz.length > 0 ? (
               <div className="flex flex-row justify-center items-center gap-2">
                 <PartyPopper />
-                <p className="text-sm text-muted-foreground">
-                  所有測驗已完成！
-                </p>
+                <p className="text-sm text-muted-foreground">所有測驗已完成！</p>
               </div>
             ) : (
               <div className="flex flex-row justify-center items-center gap-2">
@@ -277,7 +236,7 @@ export default function NewsPage() {
                 month: "long",
                 day: "numeric",
                 hour: "2-digit",
-                minute: "2-digit",
+                minute: "2-digit"
               })}
             </span>
           </div>
@@ -291,7 +250,7 @@ export default function NewsPage() {
                   month: "long",
                   day: "numeric",
                   hour: "2-digit",
-                  minute: "2-digit",
+                  minute: "2-digit"
                 })}
               </span>
             </div>

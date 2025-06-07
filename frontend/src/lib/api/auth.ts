@@ -40,27 +40,23 @@ export function logout(): void {
   // You can also call a backend logout endpoint here if needed
 }
 
-export async function registerUser(
-  userData: RegisterData
-): Promise<RegisterResponse> {
+export async function registerUser(userData: RegisterData): Promise<RegisterResponse> {
   const response = await fetch(`${baseUrl}/auth/register`, {
     credentials: "include",
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       display_name: userData.displayName,
       email: userData.email,
-      password: userData.password,
-    }),
+      password: userData.password
+    })
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.message || "Failed to register"
-    );
+    const error: ApiError = new Error(errorData.message || "Failed to register");
     error.fullResponse = errorData;
     throw error;
   }
@@ -74,12 +70,12 @@ export async function loginUser(userData: LoginData): Promise<LoginResponse> {
     credentials: "include",
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       email: userData.email,
-      password: userData.password,
-    }),
+      password: userData.password
+    })
   });
 
   if (!response.ok) {

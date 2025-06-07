@@ -23,7 +23,7 @@ export default function RegisterPage() {
     },
     onError: (error) => {
       console.error("Registration failed:", error);
-    },
+    }
   });
 
   const onSubmit = (data: RegisterData) => {
@@ -39,11 +39,7 @@ export default function RegisterPage() {
 
   return (
     <div className="h-full w-full flex flex-col justify-center">
-      <RegisterForm
-        onSubmit={onSubmit}
-        isSubmitting={mutation.isPending}
-        error={mutation.error ? getErrorMessage(mutation.error) : undefined}
-      />
+      <RegisterForm onSubmit={onSubmit} isSubmitting={mutation.isPending} error={mutation.error ? getErrorMessage(mutation.error) : undefined} />
     </div>
   );
 }

@@ -23,7 +23,7 @@ export default function LoginPage() {
     },
     onError: (error) => {
       console.error("Login failed:", error);
-    },
+    }
   });
 
   const onSubmit = (data: LoginData) => {
@@ -39,11 +39,7 @@ export default function LoginPage() {
 
   return (
     <div className="h-full w-full flex flex-col justify-center">
-      <LoginForm
-        onSubmit={onSubmit}
-        isSubmitting={mutation.isPending}
-        error={mutation.error ? getErrorMessage(mutation.error) : undefined}
-      />
+      <LoginForm onSubmit={onSubmit} isSubmitting={mutation.isPending} error={mutation.error ? getErrorMessage(mutation.error) : undefined} />
     </div>
   );
 }

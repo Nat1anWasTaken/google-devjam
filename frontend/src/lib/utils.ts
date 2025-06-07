@@ -53,10 +53,7 @@ export const mapLevelToDifficulty = (level: number | string): number => {
 };
 
 // Generate Gravatar URL from email (async)
-export const getGravatarUrl = async (
-  email: string,
-  size: number = 80
-): Promise<string> => {
+export const getGravatarUrl = async (email: string, size: number = 80): Promise<string> => {
   if (typeof window === "undefined") {
     // Server-side fallback
     return `https://www.gravatar.com/avatar/default?s=${size}&d=mp`;
@@ -70,9 +67,7 @@ export const getGravatarUrl = async (
     // Simple MD5 implementation for client-side
     const hashBuffer = await crypto.subtle.digest("MD5", data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
     return `https://www.gravatar.com/avatar/${hashHex}?s=${size}&d=mp`;
   } catch {
     // Fallback if crypto is not available
@@ -81,10 +76,7 @@ export const getGravatarUrl = async (
 };
 
 // Synchronous fallback for Gravatar (using a simple hash)
-export const getGravatarUrlSync = (
-  email: string,
-  size: number = 80
-): string => {
+export const getGravatarUrlSync = (email: string, size: number = 80): string => {
   // Simple hash function for fallback
   let hash = 0;
   const str = email.toLowerCase().trim();
@@ -96,10 +88,7 @@ export const getGravatarUrlSync = (
   const hashHex = Math.abs(hash).toString(16);
   return `https://www.gravatar.com/avatar/${hashHex}?s=${size}&d=mp`;
 }; // Helper function to auto-detect audio content type
-export const detectAudioContentType = (
-  audioUrl: string,
-  headerContentType: string | null
-): string | null => {
+export const detectAudioContentType = (audioUrl: string, headerContentType: string | null): string | null => {
   // Priority 1: Use content-type from HTTP headers if available and valid
   if (headerContentType) {
     const normalizedType = headerContentType.toLowerCase();
@@ -110,17 +99,11 @@ export const detectAudioContentType = (
     }
 
     // Handle some common non-audio content types that might actually be audio
-    if (
-      normalizedType.includes("application/octet-stream") ||
-      normalizedType.includes("binary/octet-stream")
-    ) {
+    if (normalizedType.includes("application/octet-stream") || normalizedType.includes("binary/octet-stream")) {
       // Fall through to file extension detection
     } else if (normalizedType.includes("application/ogg")) {
       return "audio/ogg";
-    } else if (
-      normalizedType.includes("video/mp4") &&
-      audioUrl.toLowerCase().includes(".m4a")
-    ) {
+    } else if (normalizedType.includes("video/mp4") && audioUrl.toLowerCase().includes(".m4a")) {
       return "audio/mp4";
     }
   }
@@ -141,7 +124,7 @@ export const detectAudioContentType = (
     ".flac": "audio/flac",
     ".wma": "audio/x-ms-wma",
     ".webm": "audio/webm",
-    ".opus": "audio/opus",
+    ".opus": "audio/opus"
   };
 
   // Check for file extensions
@@ -154,8 +137,7 @@ export const detectAudioContentType = (
   // Priority 3: Check query parameters for format hints
   try {
     const urlObj = new URL(audioUrl);
-    const format =
-      urlObj.searchParams.get("format") || urlObj.searchParams.get("type");
+    const format = urlObj.searchParams.get("format") || urlObj.searchParams.get("type");
     if (format) {
       const formatLower = format.toLowerCase();
       if (extensionMap[`.${formatLower}`]) {

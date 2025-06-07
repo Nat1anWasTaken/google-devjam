@@ -30,18 +30,12 @@ export function WordCard({ word }: WordCardProps) {
               <Badge variant="outline" className="text-muted-foreground">
                 {word.part_of_speech ? word.part_of_speech : "Unknown"}
               </Badge>
-              <Badge
-                className={`text-white ${getDifficultyColor(word.difficulty)}`}
-              >
-                難度 {word.difficulty}/10
-              </Badge>
+              <Badge className={`text-white ${getDifficultyColor(word.difficulty)}`}>難度 {word.difficulty}/10</Badge>
             </div>
           )}
         </div>
 
-        <p className="text-sm text-muted-foreground mt-1">
-          {displayDefinition}
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">{displayDefinition}</p>
       </CardContent>
     </Card>
   );

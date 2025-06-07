@@ -25,11 +25,11 @@ export default function WordPage() {
   const {
     data: wordResponse,
     isLoading: loading,
-    error,
+    error
   } = useQuery({
     queryKey: ["word", wordId],
     queryFn: () => getWord(wordId),
-    enabled: !!wordId,
+    enabled: !!wordId
   });
 
   const deleteWordMutation = useMutation({
@@ -39,8 +39,7 @@ export default function WordPage() {
 
       // Optimistically update the vocabulary list cache
       queryClient.setQueryData(["vocabulary"], (oldData: unknown) => {
-        if (!oldData || typeof oldData !== "object" || !("words" in oldData))
-          return oldData;
+        if (!oldData || typeof oldData !== "object" || !("words" in oldData)) return oldData;
 
         const data = oldData as { words: Array<{ id: string }>; total: number };
         const filteredWords = data.words.filter((word) => word.id !== wordId);
@@ -48,7 +47,7 @@ export default function WordPage() {
         return {
           ...data,
           words: filteredWords,
-          total: Math.max(0, data.total - 1), // Update total count
+          total: Math.max(0, data.total - 1) // Update total count
         };
       });
 
@@ -60,7 +59,7 @@ export default function WordPage() {
     },
     onError: (error: Error) => {
       toast.error(error?.message || "刪除單字失敗");
-    },
+    }
   });
 
   const handleDeleteWord = () => {
@@ -76,12 +75,7 @@ export default function WordPage() {
         <div className="max-w-2xl mx-auto space-y-6">
           {/* 導航按鈕 */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/vocabulary")}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
+            <Button variant="ghost" size="sm" onClick={() => router.push("/vocabulary")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
               <ArrowLeftIcon className="h-4 w-4" />
               返回詞彙列表
             </Button>
@@ -122,22 +116,11 @@ export default function WordPage() {
         <div className="max-w-2xl mx-auto space-y-6">
           {/* 導航與刪除按鈕 */}
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/vocabulary")}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
+            <Button variant="ghost" size="sm" onClick={() => router.push("/vocabulary")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
               <ArrowLeftIcon className="h-4 w-4" />
               返回詞彙列表
             </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={deleteWordMutation.isPending}
-              className="flex items-center gap-2"
-            >
+            <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} disabled={deleteWordMutation.isPending} className="flex items-center gap-2">
               <TrashIcon className="h-4 w-4" />
               {deleteWordMutation.isPending ? "刪除中..." : "刪除"}
             </Button>
@@ -145,9 +128,7 @@ export default function WordPage() {
 
           <Card>
             <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">
-                {error?.message || "Word not found"}
-              </p>
+              <p className="text-center text-muted-foreground">{error?.message || "Word not found"}</p>
             </CardContent>
           </Card>
         </div>
@@ -160,22 +141,11 @@ export default function WordPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* 導航與刪除按鈕 */}
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/vocabulary")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.push("/vocabulary")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
             <ArrowLeftIcon className="h-4 w-4" />
             返回詞彙列表
           </Button>{" "}
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={deleteWordMutation.isPending}
-            className="flex items-center gap-2"
-          >
+          <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} disabled={deleteWordMutation.isPending} className="flex items-center gap-2">
             <TrashIcon className="h-4 w-4" />
             {deleteWordMutation.isPending ? "刪除中..." : "刪除"}
           </Button>
@@ -190,13 +160,7 @@ export default function WordPage() {
                 <Badge variant="outline" className="text-muted-foreground">
                   {word.part_of_speech ? word.part_of_speech : "Unknown"}
                 </Badge>
-                <Badge
-                  className={`text-white ${getDifficultyColor(
-                    word.difficulty
-                  )}`}
-                >
-                  難度 {word.difficulty}/10
-                </Badge>
+                <Badge className={`text-white ${getDifficultyColor(word.difficulty)}`}>難度 {word.difficulty}/10</Badge>
               </div>
             </div>
           </CardHeader>
@@ -234,54 +198,36 @@ export default function WordPage() {
         </Card>
 
         {/* 例句 */}
-        {word &&
-          "examples" in word &&
-          word.examples &&
-          word.examples.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>例句</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {word.examples.map((example) => (
-                    <div
-                      key={example.id}
-                      className="p-3 bg-muted rounded-lg border-l-4 border-primary"
-                    >
-                      <p className="text-sm leading-relaxed">
-                        {example.sentence}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+        {word && "examples" in word && word.examples && word.examples.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>例句</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {word.examples.map((example) => (
+                  <div key={example.id} className="p-3 bg-muted rounded-lg border-l-4 border-primary">
+                    <p className="text-sm leading-relaxed">{example.sentence}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* 時間戳記 */}
         <Card>
           <CardContent>
             <div className="text-xs text-muted-foreground space-y-1">
-              <p>
-                創建時間: {new Date(word.created_at).toLocaleString("zh-TW")}
-              </p>
-              <p>
-                更新時間: {new Date(word.updated_at).toLocaleString("zh-TW")}
-              </p>
+              <p>創建時間: {new Date(word.created_at).toLocaleString("zh-TW")}</p>
+              <p>更新時間: {new Date(word.updated_at).toLocaleString("zh-TW")}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* 刪除確認對話框 */}
-      <DeleteWordDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDeleteWord}
-        wordName={word?.word}
-        isDeleting={deleteWordMutation.isPending}
-      />
+      <DeleteWordDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} onConfirm={handleDeleteWord} wordName={word?.word} isDeleting={deleteWordMutation.isPending} />
     </div>
   );
 }

@@ -39,14 +39,12 @@ export async function getUserPreferences(): Promise<PreferencesResponse> {
   const response = await fetch(`${baseUrl}/user/preferences`, {
     credentials: "include",
     method: "GET",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to get user preferences"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to get user preferences");
     error.fullResponse = errorData;
     throw error;
   }
@@ -55,21 +53,17 @@ export async function getUserPreferences(): Promise<PreferencesResponse> {
   return responseData;
 }
 
-export async function createUserPreferences(
-  data: CreatePreferencesRequest
-): Promise<PreferencesResponse> {
+export async function createUserPreferences(data: CreatePreferencesRequest): Promise<PreferencesResponse> {
   const response = await fetch(`${baseUrl}/user/preferences`, {
     credentials: "include",
     method: "POST",
     headers: createAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to create user preferences"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to create user preferences");
     error.fullResponse = errorData;
     throw error;
   }
@@ -78,21 +72,17 @@ export async function createUserPreferences(
   return responseData;
 }
 
-export async function updateUserPreferences(
-  data: UpdatePreferencesRequest
-): Promise<PreferencesResponse> {
+export async function updateUserPreferences(data: UpdatePreferencesRequest): Promise<PreferencesResponse> {
   const response = await fetch(`${baseUrl}/user/preferences`, {
     credentials: "include",
     method: "PUT",
     headers: createAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to update user preferences"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to update user preferences");
     error.fullResponse = errorData;
     throw error;
   }
@@ -105,14 +95,12 @@ export async function deleteUserPreferences(): Promise<SuccessResponse> {
   const response = await fetch(`${baseUrl}/user/preferences`, {
     credentials: "include",
     method: "DELETE",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to delete user preferences"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to delete user preferences");
     error.fullResponse = errorData;
     throw error;
   }
@@ -121,23 +109,19 @@ export async function deleteUserPreferences(): Promise<SuccessResponse> {
   return responseData;
 }
 
-export async function addInterest(
-  interest: string
-): Promise<PreferencesResponse> {
+export async function addInterest(interest: string): Promise<PreferencesResponse> {
   const data: AddInterestRequest = { interest };
 
   const response = await fetch(`${baseUrl}/user/preferences/interests`, {
     credentials: "include",
     method: "POST",
     headers: createAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to add interest"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to add interest");
     error.fullResponse = errorData;
     throw error;
   }
@@ -146,26 +130,19 @@ export async function addInterest(
   return responseData;
 }
 
-export async function removeInterest(
-  interest: string
-): Promise<PreferencesResponse> {
+export async function removeInterest(interest: string): Promise<PreferencesResponse> {
   // URL encode the interest parameter to handle special characters
   const encodedInterest = encodeURIComponent(interest);
 
-  const response = await fetch(
-    `${baseUrl}/user/preferences/interests/${encodedInterest}`,
-    {
-      credentials: "include",
-      method: "DELETE",
-      headers: createAuthHeaders(),
-    }
-  );
+  const response = await fetch(`${baseUrl}/user/preferences/interests/${encodedInterest}`, {
+    credentials: "include",
+    method: "DELETE",
+    headers: createAuthHeaders()
+  });
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error: ApiError = new Error(
-      errorData.error || "Failed to remove interest"
-    );
+    const error: ApiError = new Error(errorData.error || "Failed to remove interest");
     error.fullResponse = errorData;
     throw error;
   }
@@ -178,7 +155,7 @@ export async function getUser(): Promise<User | null> {
   const response = await fetch(`${baseUrl}/user/me`, {
     credentials: "include",
     method: "GET",
-    headers: createAuthHeaders(),
+    headers: createAuthHeaders()
   });
 
   if (!response.ok) {

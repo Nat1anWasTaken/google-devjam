@@ -17,38 +17,25 @@ type UseAuthReturn = {
   error: Error | null;
 };
 
-export default function useAuth({
-  redirectIfUnauthenticated = true,
-}: UseAuthOptions = {}): UseAuthReturn {
+export default function useAuth({ redirectIfUnauthenticated = true }: UseAuthOptions = {}): UseAuthReturn {
   const router = useRouter();
 
   const query = useQuery({
     queryKey: ["currentUser"],
-    queryFn: getUser,
+    queryFn: getUser
   });
 
   useEffect(() => {
-    if (
-      redirectIfUnauthenticated &&
-      !query.isLoading &&
-      !query.isError &&
-      query.data === null
-    ) {
+    if (redirectIfUnauthenticated && !query.isLoading && !query.isError && query.data === null) {
       removeStoredToken();
       router.push("/login");
     }
-  }, [
-    redirectIfUnauthenticated,
-    query.isLoading,
-    query.isError,
-    query.data,
-    router,
-  ]);
+  }, [redirectIfUnauthenticated, query.isLoading, query.isError, query.data, router]);
 
   return {
     user: query.data ?? null,
     isLoading: query.isLoading,
     isError: query.isError,
-    error: query.error,
+    error: query.error
   };
 }

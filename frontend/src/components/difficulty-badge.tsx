@@ -6,9 +6,5 @@ interface DifficultyBadgeProps {
 }
 
 export function DifficultyBadge({ difficulty }: DifficultyBadgeProps) {
-  return (
-    <Badge className={`text-white ${getDifficultyColor(difficulty)}`}>
-      難度 {difficulty}/10
-    </Badge>
-  );
+  return <Badge className={`text-white ${getDifficultyColor(difficulty)}`}>難度 {difficulty}/10</Badge>;
 }
