@@ -27,9 +27,11 @@ export default function VocabularyPage() {
           ) : query.data?.words.length === 0 ? (
             <div className="h-full w-full flex flex-col items-center justify-center">
               <p className="text-lg">這裡空空如也...</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                你還沒有添加任何單字，點擊下方的 <Plus className="h-4 w-4" /> 新增你想學習的單字！
-              </p>
+              <div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  你還沒有添加任何單字，點擊下方的 <Plus className="h-4 w-4" /> 新增你想學習的單字！
+                </p>
+              </div>
             </div>
           ) : (
             query.data?.words.map((word) => <WordCard key={word.id} word={word} />)
