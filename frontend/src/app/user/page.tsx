@@ -7,24 +7,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddInterestsDialog } from "@/components/add-interests-dialog";
 import useAuth from "@/hooks/use-auth";
 import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
-import { cn, getDifficultyColor, getGravatarUrlSync } from "@/lib/utils";
+import { cn, getDifficultyColor } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Mail, User, X } from "lucide-react";
-import Image from "next/image";
-import { useMemo } from "react";
 
 export default function UserPage() {
   const { user, isLoading: userLoading } = useAuth();
 
   const queryClient = useQueryClient();
-
-  // Memoize the avatar URL to prevent unnecessary recalculations
-  const avatarUrl = useMemo(() => {
-    if (user?.email) {
-      return getGravatarUrlSync(user.email, 120);
-    }
-    return `https://www.gravatar.com/avatar/default?s=120&d=mp`;
-  }, [user?.email]);
 
   // Fetch user preferences
   const {
@@ -106,19 +96,11 @@ export default function UserPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col items-center space-y-4">
-              {/* Avatar */}
+              {/* User Icon */}
               <div className="relative">
-                <Image
-                  src={avatarUrl || `https://www.gravatar.com/avatar/default?s=120&d=mp`}
-                  alt={`${user.display_name} 的頭像`}
-                  width={96}
-                  height={96}
-                  className="size-24 rounded-full border-4 border-background shadow-lg"
-                  onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    img.src = `https://www.gravatar.com/avatar/default?s=120&d=mp`;
-                  }}
-                />
+                <div className="size-24 rounded-full border-4 border-background shadow-lg bg-muted flex items-center justify-center">
+                  <User className="size-12 text-muted-foreground" />
+                </div>
               </div>
 
               {/* User Info */}
@@ -234,7 +216,9 @@ function UserPageSkeleton() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col items-center space-y-4">
-              <Skeleton className="size-24 rounded-full" />
+              <div className="size-24 rounded-full bg-muted flex items-center justify-center">
+                <User className="size-12 text-muted-foreground" />
+              </div>
               <div className="text-center space-y-2">
                 <Skeleton className="h-8 w-32" />
                 <Skeleton className="h-5 w-48" />

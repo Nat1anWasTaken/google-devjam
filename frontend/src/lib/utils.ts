@@ -52,42 +52,7 @@ export const mapLevelToDifficulty = (level: number | string): number => {
   }
 };
 
-// Generate Gravatar URL from email (async)
-export const getGravatarUrl = async (email: string, size: number = 80): Promise<string> => {
-  if (typeof window === "undefined") {
-    // Server-side fallback
-    return `https://www.gravatar.com/avatar/default?s=${size}&d=mp`;
-  }
-
-  try {
-    // Create MD5 hash of email
-    const encoder = new TextEncoder();
-    const data = encoder.encode(email.toLowerCase().trim());
-
-    // Simple MD5 implementation for client-side
-    const hashBuffer = await crypto.subtle.digest("MD5", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-    return `https://www.gravatar.com/avatar/${hashHex}?s=${size}&d=mp`;
-  } catch {
-    // Fallback if crypto is not available
-    return `https://www.gravatar.com/avatar/default?s=${size}&d=mp`;
-  }
-};
-
-// Synchronous fallback for Gravatar (using a simple hash)
-export const getGravatarUrlSync = (email: string, size: number = 80): string => {
-  // Simple hash function for fallback
-  let hash = 0;
-  const str = email.toLowerCase().trim();
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  const hashHex = Math.abs(hash).toString(16);
-  return `https://www.gravatar.com/avatar/${hashHex}?s=${size}&d=mp`;
-}; // Helper function to auto-detect audio content type
+// Helper function to auto-detect audio content type
 export const detectAudioContentType = (audioUrl: string, headerContentType: string | null): string | null => {
   // Priority 1: Use content-type from HTTP headers if available and valid
   if (headerContentType) {
@@ -166,7 +131,9 @@ export const detectAudioContentType = (audioUrl: string, headerContentType: stri
   // Priority 5: Default fallback based on common usage
   // MP3 is the most widely supported format
   return "audio/mpeg";
-}; // Helper function to format time in mm:ss format
+};
+
+// Helper function to format time in mm:ss format
 export const formatTime = (seconds: number): string => {
   if (isNaN(seconds) || seconds < 0) return "0:00";
 
