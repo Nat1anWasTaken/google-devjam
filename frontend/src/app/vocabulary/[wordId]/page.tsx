@@ -201,7 +201,7 @@ export default function WordPage() {
         {word && "examples" in word && word.examples && word.examples.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>例句</CardTitle>
+              <CardTitle className="font-bold text-lg">例句</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -214,6 +214,25 @@ export default function WordPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* 學習狀態 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-bold text-lg">學習狀態</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-col justify-center items-center gap-2">
+              <div className="flex flex-row justify-between items-center w-full">
+                <h2 className="text-sm">學習次數</h2>
+                <p className="text-sm text-muted-foreground">{word.learn_count}</p>
+              </div>
+              <div className="flex flex-row justify-between items-center w-full">
+                <h2 className="text-sm">熟練度</h2>
+                <p className="text-sm text-muted-foreground">{word.fluency}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* 時間戳記 */}
         <Card>
