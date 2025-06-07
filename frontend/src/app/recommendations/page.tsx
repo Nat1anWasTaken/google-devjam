@@ -48,7 +48,7 @@ export default function RecommendationsPage() {
     <div className="h-full w-full px-6 py-8 overflow-auto">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold">推薦</h1>
-        <p className="text-sm text-muted-foreground mt-1">根據你的學習進度，我們為你推薦以下單字。點擊「加入」按鈕將單字添加到你的單字庫。</p>
+        <p className="text-sm text-muted-foreground mt-1">根據你的學習進度，我們推薦你學習這些單字。右滑加入自己的單字庫，左滑移除這個推薦</p>
         <div className="mt-6 flex flex-col gap-4">
           {query.isLoading ? (
             <AILoadingAnimation />
