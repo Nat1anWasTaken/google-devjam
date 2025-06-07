@@ -12,7 +12,7 @@ interface ApiError extends Error {
 type GetNewsParams = {
   page?: number;
   limit?: number;
-  level?: "beginner" | "intermediate" | "advanced";
+  level?: number;
   search?: string;
 };
 
@@ -43,7 +43,7 @@ function buildQueryString(params: GetNewsParams): string {
     searchParams.append("limit", params.limit.toString());
   }
   if (params.level !== undefined) {
-    searchParams.append("level", params.level);
+    searchParams.append("level", params.level.toString());
   }
   if (params.search !== undefined) {
     searchParams.append("search", params.search);
@@ -64,6 +64,26 @@ export async function generateNews(): Promise<GenerateNewsResponse> {
     const errorData = await response.json();
     const error: ApiError = new Error(
       errorData.error || "Failed to generate news"
+    );
+    error.fullResponse = errorData;
+    throw error;
+  }
+
+  const responseData = await response.json();
+  return responseData;
+}
+
+export async function forceGenerateNews(): Promise<GenerateNewsResponse> {
+  const response = await fetch(`${baseUrl}/news/force-generate`, {
+    credentials: "include",
+    method: "POST",
+    headers: createAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error: ApiError = new Error(
+      errorData.error || "Failed to force generate news"
     );
     error.fullResponse = errorData;
     throw error;

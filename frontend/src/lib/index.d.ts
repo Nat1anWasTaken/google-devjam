@@ -46,10 +46,12 @@ type News = {
   user_id: string;
   title: string;
   content: string;
-  level: "beginner" | "intermediate" | "advanced";
+  level: number;
   keywords: string[];
   word_in_news: string[];
   source: string[];
+  audio_url?: string;
+  audio_key?: string;
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 };
