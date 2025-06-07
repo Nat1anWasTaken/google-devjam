@@ -20,12 +20,12 @@ export type RegisterData = {
   password: string;
 };
 
-interface RegisterFormProps {
+interface RegisterFormProps
+  extends Omit<React.ComponentProps<"div">, "onSubmit"> {
   className?: string;
   onSubmit?: (data: RegisterData) => void;
   isSubmitting?: boolean; // Optional prop to indicate if the form is submitting
   error?: string;
-  [key: string]: any; // Allow additional props
 }
 
 export function RegisterForm({

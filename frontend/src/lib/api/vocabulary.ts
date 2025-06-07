@@ -4,6 +4,10 @@ import { createAuthHeaders } from "./utils";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
 
+interface ApiError extends Error {
+  fullResponse?: unknown;
+}
+
 // Request types
 type CreateWordRequest = {
   word: string;
@@ -46,10 +50,6 @@ type SuccessResponse = {
   message: string;
 };
 
-type ErrorResponse = {
-  error: string;
-};
-
 // Helper function to build query string
 function buildQueryString(params: GetWordsParams): string {
   const searchParams = new URLSearchParams();
@@ -83,8 +83,10 @@ export async function createWord(
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.error || "Failed to create word");
-    (error as any).fullResponse = errorData;
+    const error: ApiError = new Error(
+      errorData.error || "Failed to create word"
+    );
+    error.fullResponse = errorData;
     throw error;
   }
 
@@ -105,8 +107,8 @@ export async function getWords(
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.error || "Failed to get words");
-    (error as any).fullResponse = errorData;
+    const error: ApiError = new Error(errorData.error || "Failed to get words");
+    error.fullResponse = errorData;
     throw error;
   }
 
@@ -123,8 +125,8 @@ export async function getWord(id: string): Promise<WordResponse> {
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.error || "Failed to get word");
-    (error as any).fullResponse = errorData;
+    const error: ApiError = new Error(errorData.error || "Failed to get word");
+    error.fullResponse = errorData;
     throw error;
   }
 
@@ -145,8 +147,10 @@ export async function updateWord(
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.error || "Failed to update word");
-    (error as any).fullResponse = errorData;
+    const error: ApiError = new Error(
+      errorData.error || "Failed to update word"
+    );
+    error.fullResponse = errorData;
     throw error;
   }
 
@@ -163,8 +167,10 @@ export async function deleteWord(id: string): Promise<SuccessResponse> {
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.error || "Failed to delete word");
-    (error as any).fullResponse = errorData;
+    const error: ApiError = new Error(
+      errorData.error || "Failed to delete word"
+    );
+    error.fullResponse = errorData;
     throw error;
   }
 
@@ -185,10 +191,10 @@ export async function learnWord(
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(
+    const error: ApiError = new Error(
       errorData.error || "Failed to update learning progress"
     );
-    (error as any).fullResponse = errorData;
+    error.fullResponse = errorData;
     throw error;
   }
 

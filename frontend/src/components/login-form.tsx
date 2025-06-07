@@ -18,12 +18,11 @@ export type LoginData = {
   password: string;
 };
 
-interface LoginFormProps {
+interface LoginFormProps extends Omit<React.ComponentProps<"div">, "onSubmit"> {
   className?: string;
   onSubmit?: (data: LoginData) => void;
   isSubmitting?: boolean;
   error?: string;
-  [key: string]: any; // Allow additional props
 }
 
 export function LoginForm({

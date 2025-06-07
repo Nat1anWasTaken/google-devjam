@@ -30,7 +30,7 @@ export default function RegisterPage() {
     mutation.mutate(data);
   };
 
-  const getErrorMessage = (error: any) => {
+  const getErrorMessage = (error: Error & { fullResponse?: unknown }) => {
     if (error?.fullResponse) {
       return JSON.stringify(error.fullResponse, null, 2);
     }

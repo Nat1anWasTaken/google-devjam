@@ -50,7 +50,7 @@ export function AddWordDialog() {
           <span className="sr-only">新增單字</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md duration-150">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>新增單字</DialogTitle>

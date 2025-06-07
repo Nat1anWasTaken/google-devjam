@@ -6,6 +6,10 @@ import { createAuthHeaders } from "./utils";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
 
+interface ApiError extends Error {
+  fullResponse?: unknown;
+}
+
 type LoginResponse = User & {
   token: string;
 };
@@ -55,8 +59,10 @@ export async function registerUser(
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.message || "Failed to register");
-    (error as any).fullResponse = errorData;
+    const error: ApiError = new Error(
+      errorData.message || "Failed to register"
+    );
+    error.fullResponse = errorData;
     throw error;
   }
 
@@ -79,8 +85,8 @@ export async function loginUser(userData: LoginData): Promise<LoginResponse> {
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.message || "Failed to login");
-    (error as any).fullResponse = errorData;
+    const error: ApiError = new Error(errorData.message || "Failed to login");
+    error.fullResponse = errorData;
     throw error;
   }
 

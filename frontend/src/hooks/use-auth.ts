@@ -10,10 +10,10 @@ type UseAuthOptions = {
 };
 
 type UseAuthReturn = {
-  user: any; // Replace with your user type
+  user: User | null;
   isLoading: boolean;
   isError: boolean;
-  error: any; // Replace with your error type
+  error: Error | null;
 };
 
 export default function useAuth({
@@ -44,7 +44,7 @@ export default function useAuth({
   ]);
 
   return {
-    user: query.data,
+    user: query.data ?? null,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
