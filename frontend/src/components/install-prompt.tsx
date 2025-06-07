@@ -104,13 +104,13 @@ export function InstallPrompt() {
         {isInstallable && deferredPrompt ? (
           <Button onClick={handleInstallClick} className="w-full">
             <Download className="mr-2 h-4 w-4" />
-            Install App
+            安裝 App
           </Button>
         ) : isIOS ? (
           <div className="space-y-2">
             <Button disabled className="w-full">
               <Download className="mr-2 h-4 w-4" />
-              Install App
+              安裝 App
             </Button>
             <p className="text-xs text-muted-foreground">
               在 Safari 中，點擊分享按鈕 <Share className="inline-block" />
