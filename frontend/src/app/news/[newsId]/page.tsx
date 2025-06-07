@@ -15,6 +15,7 @@ import {
   PartyPopper,
   Swords,
   Tag,
+  VolumeOff,
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { mapLevelToDifficulty } from "@/lib/utils";
@@ -22,6 +23,7 @@ import { DifficultyBadge } from "@/components/difficulty-badge";
 import { QuizComponentSkeleton } from "@/components/quiz-component-skeleton";
 import { QuizComponent } from "@/components/quiz-component";
 import { useNewsVocabulary } from "@/hooks/use-news-vocabulary";
+import AudioPlayer from "@/components/audio-player";
 
 export default function NewsPage() {
   const params = useParams();
@@ -156,6 +158,16 @@ export default function NewsPage() {
           </h1>
           <DifficultyBadge difficulty={mapLevelToDifficulty(news.level)} />
         </div>
+
+        {/* Audio Player */}
+        {news.audio_url ? (
+          <AudioPlayer audioUrl={news.audio_url} newsId={news.id} />
+        ) : (
+          <div className="flex flex-row justify-start items-center gap-2 text-sm text-muted-foreground">
+            <VolumeOff className="h-4 w-4" />
+            此新聞沒有音訊檔案可供播放。
+          </div>
+        )}
 
         {/* Article content */}
         <div className="prose prose-lg max-w-none">
