@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddInterestsDialog } from "@/components/add-interests-dialog";
 import { DifficultyLoadingAnimation } from "@/components/difficulty-loading-animation";
+import { InstallButton } from "@/components/install-button";
 import useAuth from "@/hooks/use-auth";
 import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
 import { cn, getDifficultyColor } from "@/lib/utils";
@@ -244,6 +245,17 @@ export default function UserPage() {
                 <p className="text-sm mt-1">點擊上方按鈕新增您的興趣</p>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Install App Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>安裝應用程式</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-muted-foreground">將 LexLoop 安裝到您的裝置上，享受更好的使用體驗。</p>
+            <InstallButton size="lg" className="w-full" />
           </CardContent>
         </Card>
       </div>

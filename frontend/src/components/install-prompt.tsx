@@ -36,6 +36,8 @@ export function InstallPrompt() {
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
       setShowPrompt(true);
+      // Mark as shown in current session
+      sessionStorage.setItem("install-prompt-shown", "true");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -43,6 +45,8 @@ export function InstallPrompt() {
     // For iOS devices, show prompt if not in standalone mode
     if (isIOSDevice && !isInStandalone) {
       setShowPrompt(true);
+      // Mark as shown in current session
+      sessionStorage.setItem("install-prompt-shown", "true");
     }
 
     return () => {
@@ -66,10 +70,20 @@ export function InstallPrompt() {
     setShowPrompt(false);
     // Hide for 24 hours
     localStorage.setItem("install-prompt-dismissed", Date.now().toString());
+    // Mark as shown in current session
+    sessionStorage.setItem("install-prompt-shown", "true");
   };
 
-  // Check if prompt was recently dismissed
+  // Check if prompt was recently dismissed or already shown in this session
   useEffect(() => {
+    // Check if already shown in this session
+    const shownInSession = sessionStorage.getItem("install-prompt-shown");
+    if (shownInSession) {
+      setShowPrompt(false);
+      return;
+    }
+
+    // Check if dismissed in last 24 hours
     const dismissed = localStorage.getItem("install-prompt-dismissed");
     if (dismissed) {
       const dismissedTime = parseInt(dismissed);
