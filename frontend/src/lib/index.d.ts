@@ -40,3 +40,16 @@ type UserPreferences = {
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 };
+
+type News = {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  level: "beginner" | "intermediate" | "advanced";
+  keywords: string[];
+  word_in_news: string[];
+  source: string[];
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+};
