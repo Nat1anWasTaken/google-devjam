@@ -1,7 +1,6 @@
-import Image from "next/image";
-
 export default function Home() {
-  return (
-    
-  );
+  <div className="flex flex-col h-full w-full justify-between">
+    <div className="flex-grow"></div>
+    <div></div>
+  </div>;
 }

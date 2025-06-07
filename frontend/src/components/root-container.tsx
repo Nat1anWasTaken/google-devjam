@@ -1,8 +1,11 @@
 "use client";
 
 import { isMobile } from "@/lib/utils";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { DeviceNotSupported } from "./device-not-supported";
+
+const queryClient = new QueryClient();
 
 export function RootContainer({
   children,
@@ -30,7 +33,12 @@ export function RootContainer({
   }
 
   return mobile ? (
-    <div className="h-screen w-screen">{children}</div>
+    <QueryClientProvider client={queryClient}>
+      <div className="flex flex-col h-screen w-screen">
+        <div className="flex-grow"></div>
+        {children}
+      </div>
+    </QueryClientProvider>
   ) : (
     <DeviceNotSupported />
   );

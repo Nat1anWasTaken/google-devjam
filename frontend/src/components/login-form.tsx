@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-type LoginData = {
+export type LoginData = {
   email: string;
   password: string;
 };
@@ -19,10 +21,18 @@ type LoginData = {
 interface LoginFormProps {
   className?: string;
   onSubmit?: (data: LoginData) => void;
+  isSubmitting?: boolean;
+  error?: string;
   [key: string]: any; // Allow additional props
 }
 
-export function LoginForm({ className, onSubmit, ...props }: LoginFormProps) {
+export function LoginForm({
+  className,
+  onSubmit,
+  isSubmitting,
+  error,
+  ...props
+}: LoginFormProps) {
   const [formData, setFormData] = useState<LoginData>({
     email: "",
     password: "",
@@ -86,11 +96,17 @@ export function LoginForm({ className, onSubmit, ...props }: LoginFormProps) {
                   required
                 />
               </div>
-              <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
-                  Login
-                </Button>
-              </div>
+
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Logging in..." : "Login"}
+              </Button>
+              {error && (
+                <div className="text-sm text-red-500 text-center">
+                  <pre className="whitespace-pre-wrap text-left bg-red-50 p-2 rounded border overflow-auto max-h-32">
+                    {error}
+                  </pre>
+                </div>
+              )}
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}

@@ -11,10 +11,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
 
-type RegisterData = {
-  fullName: string;
+export type RegisterData = {
+  displayName: string;
   email: string;
   password: string;
 };
@@ -22,21 +23,41 @@ type RegisterData = {
 interface RegisterFormProps {
   className?: string;
   onSubmit?: (data: RegisterData) => void;
+  isSubmitting?: boolean; // Optional prop to indicate if the form is submitting
+  error?: string;
   [key: string]: any; // Allow additional props
 }
 
 export function RegisterForm({
   className,
   onSubmit,
+  isSubmitting = false,
+  error,
   ...props
 }: RegisterFormProps) {
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState<RegisterData>({
+    displayName: "",
+    email: "",
+    password: "",
+  });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    if (confirmPassword && e.target.value !== confirmPassword) {
+    const { value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      password: value,
+    }));
+    if (confirmPassword && value !== confirmPassword) {
       setPasswordError("Passwords do not match");
     } else {
       setPasswordError("");
@@ -47,10 +68,17 @@ export function RegisterForm({
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setConfirmPassword(e.target.value);
-    if (password && e.target.value !== password) {
+    if (formData.password && e.target.value !== formData.password) {
       setPasswordError("Passwords do not match");
     } else {
       setPasswordError("");
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (onSubmit && !passwordError && formData.password === confirmPassword) {
+      onSubmit(formData);
     }
   };
 
@@ -64,14 +92,17 @@ export function RegisterForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="displayName">Display Name</Label>
                 <Input
-                  id="fullName"
+                  id="displayName"
+                  name="displayName"
                   type="text"
                   placeholder="John Doe"
+                  value={formData.displayName}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -79,8 +110,11 @@ export function RegisterForm({
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -88,8 +122,9 @@ export function RegisterForm({
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
-                  value={password}
+                  value={formData.password}
                   onChange={handlePasswordChange}
                   required
                 />
@@ -98,6 +133,7 @@ export function RegisterForm({
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
@@ -112,11 +148,28 @@ export function RegisterForm({
                   type="submit"
                   className="w-full"
                   disabled={
-                    passwordError !== "" || !password || !confirmPassword
+                    passwordError !== "" ||
+                    !formData.password ||
+                    !confirmPassword ||
+                    isSubmitting
                   }
                 >
-                  Create Account
+                  {isSubmitting ? (
+                    <>
+                      <Loader2Icon className="animate-spin" />
+                      Creating your account...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
+                {error && (
+                  <div className="text-sm text-red-500 text-center">
+                    <pre className="whitespace-pre-wrap text-left bg-red-50 p-2 rounded border overflow-auto max-h-32">
+                      {error}
+                    </pre>
+                  </div>
+                )}
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
