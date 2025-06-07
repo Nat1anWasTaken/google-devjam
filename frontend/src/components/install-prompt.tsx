@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, X } from "lucide-react";
+import { Download, Plus, Share, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -92,13 +92,13 @@ export function InstallPrompt() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Download className="h-5 w-5" />
-            <CardTitle className="text-base">Install LexLoop</CardTitle>
+            <CardTitle className="text-base">安裝 LexLoop</CardTitle>
           </div>
           <Button variant="ghost" size="sm" onClick={handleDismiss} className="h-8 w-8 p-0">
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <CardDescription>Get the full app experience with offline access and faster loading.</CardDescription>
+        <CardDescription>獲取完整的應用體驗，離線訪問和更快的加載速度。</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         {isInstallable && deferredPrompt ? (
@@ -113,13 +113,14 @@ export function InstallPrompt() {
               Install App
             </Button>
             <p className="text-xs text-muted-foreground">
-              To install: Tap the Share button <span className="inline-block">📤</span> in Safari, then select &ldquo;Add to Home Screen&rdquo; <span className="inline-block">➕</span>
+              在 Safari 中，點擊分享按鈕 <Share className="inline-block" />
+              ，然後選擇 &ldquo;加入主畫面&rdquo; <Plus className="inline-block" />。
             </p>
           </div>
         ) : (
           <Button disabled className="w-full">
             <Download className="mr-2 h-4 w-4" />
-            Install App
+            安裝 App
           </Button>
         )}
       </CardContent>
