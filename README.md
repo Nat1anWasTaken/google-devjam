@@ -3,22 +3,22 @@
 ## 重點功能
 - 沉浸式學習
 1. 新聞文章推薦模組
-新聞網站
-https://www.bbc.com/news
-https://www.reuters.com/
-https://www.theguardian.com/international
-API:
-https://newsapi.org
-https://gnews.io/
-https://learn.microsoft.com/...bing-news-search
-https://open-platform.theguardian.com/
+新聞網站<br>
+https://www.bbc.com/news<br>
+https://www.reuters.com/<br>
+https://www.theguardian.com/international<br>
+API:<br>
+https://newsapi.org<br>
+https://gnews.io/<br>
+https://learn.microsoft.com/...bing-news-search<br>
+https://open-platform.theguardian.com/<br>
 
 
 2. 新聞影片學習模組
-google youtube data API：[text](https://developers.google.com/youtube/v3/getting-started?hl=zh-tw)
+google youtube data API：[text](https://developers.google.com/youtube/v3/ <br>getting-started?hl=zh-tw)
 
 3. 情境式AI生成文章模組
-Google ai stusio：https://aistudio.google.com
+Google ai stusio：https://aistudio.google.com<br>
 
 - 使用者客製化學習
 1. 自定義主題主體
