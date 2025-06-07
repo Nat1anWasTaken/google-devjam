@@ -12,6 +12,7 @@ import { useState } from "react";
 export function AddWordDialog() {
   const [open, setOpen] = useState(false);
   const [word, setWord] = useState("");
+  const [error, setError] = useState<string>("");
   const queryClient = useQueryClient();
 
   const createWordMutation = useMutation({
@@ -20,11 +21,12 @@ export function AddWordDialog() {
       // Invalidate and refetch vocabulary queries
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
       setWord("");
+      setError("");
       setOpen(false);
     },
     onError: (error) => {
       console.error("Failed to create word:", error);
-      // TODO: Add proper error handling/toast notification
+      setError(error instanceof Error ? error.message : String(error));
     }
   });
 
@@ -32,11 +34,19 @@ export function AddWordDialog() {
     e.preventDefault();
     if (!word.trim()) return;
 
+    setError("");
     createWordMutation.mutate({ word: word.trim() });
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (newOpen) {
+      setError("");
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           size="icon"
@@ -59,6 +69,11 @@ export function AddWordDialog() {
               <Label htmlFor="word">單字</Label>
               <Input id="word" value={word} onChange={(e) => setWord(e.target.value)} placeholder="輸入單字..." disabled={createWordMutation.isPending} autoFocus />
             </div>
+            {error && (
+              <div className="text-sm text-red-500">
+                <pre className="whitespace-pre-wrap text-left bg-red-50 p-2 rounded border overflow-auto max-h-32">{error}</pre>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <div className="grid grid-cols-2 gap-2">
