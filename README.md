@@ -10,7 +10,6 @@ https://www.theguardian.com/international<br>
 API:<br>
 https://newsapi.org<br>
 https://gnews.io/<br>
-https://learn.microsoft.com/...bing-news-search<br>
 https://open-platform.theguardian.com/<br>
 
 
