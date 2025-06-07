@@ -1,16 +1,16 @@
 "use client";
 
+import { AddInterestsDialog } from "@/components/add-interests-dialog";
+import { InstallButton } from "@/components/install-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AddInterestsDialog } from "@/components/add-interests-dialog";
-import { InstallButton } from "@/components/install-button";
 import useAuth from "@/hooks/use-auth";
 import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
 import { cn, getDifficultyColor } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, LoaderCircle, Mail, User, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Mail, User, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -148,13 +148,6 @@ export default function UserPage() {
               </div>
             ) : (
               <div className="text-center space-y-4 relative">
-                {/* Loading Overlay */}
-                {updateLevelMutation.isPending && (
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-                    <LoaderCircle className="size-8 animate-spin text-muted-foreground" />
-                  </div>
-                )}
-
                 {/* Level Display with Arrow Controls */}
                 <div className="flex items-center justify-center gap-4">
                   {/* Decrease Button */}
