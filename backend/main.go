@@ -9,7 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	firebaseUtils "google-devjam-backend/utils/firebase"
+	"google-devjam-backend/router/auth"
+	mongoUtils "google-devjam-backend/utils/mongodb"
 )
 
 func main() {
@@ -18,9 +19,9 @@ func main() {
 		log.Println("No .env file found or error loading .env file:", err)
 	}
 
-	// Initialize Firebase
-	if err := firebaseUtils.InitFirebase(); err != nil {
-		log.Fatalf("Failed to initialize Firebase: %v", err)
+	// Initialize MongoDB
+	if err := mongoUtils.Connect(); err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
 
 	// Create echo instance
@@ -29,11 +30,12 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 
 	// Routes
 	e.GET("/", hello)
 	e.GET("/health", health)
-	e.GET("/config", config) // New route to check environment variables
+	auth.InitRoutes(e)
 
 	// Get port from environment or default to 8080
 	port := os.Getenv("PORT")
@@ -55,16 +57,5 @@ func hello(c echo.Context) error {
 func health(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"status": "OK",
-	})
-}
-
-// New handler to check if environment variables are loaded
-func config(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"firebase_project_name":   os.Getenv("FIREBASE_PROJECT_NAME"),
-		"firebase_project_id":     os.Getenv("FIREBASE_PROJECT_ID"),
-		"firebase_project_number": os.Getenv("FIREBASE_PROJECT_NUMBER"),
-		"firebase_environment":    os.Getenv("FIREBASE_PROJECT_ENVIRONMENT"),
-		"port":                    os.Getenv("PORT"),
 	})
 }
