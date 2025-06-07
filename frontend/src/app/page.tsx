@@ -1,6 +1,9 @@
 "use client";
 
 import { BottomNavigation, TabType } from "@/components/bottom-navigation";
+import News from "@/components/tabs/news";
+import { UserProfile } from "@/components/tabs/user-profile";
+import { Vocabulary } from "@/components/tabs/vocabulary";
 import useAuth from "@/hooks/use-auth";
 import { useState } from "react";
 
@@ -10,10 +13,9 @@ export default function Home() {
 
   return (
     <>
-      <div className="h-full w-full flex flex-col justify-center items-center">
-        <h1 className="text-2xl font-bold">Welcome to the Home Page</h1>
-        <p className="mt-4">Please navigate to the login or register page.</p>
-      </div>
+      {activeTab === "vocabulary" && <Vocabulary />}
+      {activeTab === "news" && <News />}
+      {activeTab === "user" && <UserProfile />}
       <BottomNavigation
         activeTab={activeTab}
         onTabChange={(tab: TabType) => {
