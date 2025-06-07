@@ -1,6 +1,5 @@
 "use client";
 
-import { ErrorTest } from "@/components/error-test";
 import { WordCard } from "@/components/word-card";
 import { WordCardSkeleton } from "@/components/word-card-skeleton";
 import { getWords } from "@/lib/api/vocabulary";
@@ -18,7 +17,6 @@ export default function VocabularyPage() {
         <h1 className="text-4xl font-bold">單字庫</h1>
         <p className="text-sm text-muted-foreground mt-1">你有興趣的單字都在這裡，點擊查看詳細資訊或添加新單字。</p>
 
-        {/* Temporary error test component - remove after testing */}
         <div className="mt-6 flex flex-col gap-4">
           {query.isLoading ? (
             <>
