@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BottomNavigation } from "./bottom-navigation";
 import { DeviceNotSupported } from "./device-not-supported";
-import useAuth from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
 
