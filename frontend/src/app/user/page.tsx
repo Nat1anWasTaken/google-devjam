@@ -14,6 +14,7 @@ import {
 import { cn, getDifficultyColor, getGravatarUrlSync } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Mail, User, X } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function UserPage() {
@@ -116,9 +117,14 @@ export default function UserPage() {
             <div className="flex flex-col items-center space-y-4">
               {/* Avatar */}
               <div className="relative">
-                <img
-                  src={avatarUrl ? avatarUrl : undefined}
+                <Image
+                  src={
+                    avatarUrl ||
+                    `https://www.gravatar.com/avatar/default?s=120&d=mp`
+                  }
                   alt={`${user.display_name} 的頭像`}
+                  width={96}
+                  height={96}
                   className="size-24 rounded-full border-4 border-background shadow-lg"
                   onError={(e) => {
                     const img = e.target as HTMLImageElement;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Plus, X } from "lucide-react";
@@ -14,17 +14,12 @@ type RecommendationCardProps = {
   onRemove?: (wordId: string) => void;
 };
 
-export function RecommendationCard({
-  word,
-  onRemove,
-}: RecommendationCardProps) {
+export function RecommendationCard({ word, onRemove }: RecommendationCardProps) {
   const queryClient = useQueryClient();
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [animationDirection, setAnimationDirection] = useState<
-    "left" | "right" | null
-  >(null);
+  const [animationDirection, setAnimationDirection] = useState<"left" | "right" | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
   const currentX = useRef(0);
@@ -39,15 +34,14 @@ export function RecommendationCard({
       // Only remove from parent after successful API call
       onRemove?.(word.id);
     },
-    onError: (error: any) => {
-      const errorMessage =
-        error.fullResponse?.error || error.message || "加入失敗";
+    onError: (error: Error) => {
+      const errorMessage = (error as { fullResponse?: { error?: string } }).fullResponse?.error || error.message || "加入失敗";
       toast.error(`加入單字失敗：${errorMessage}`);
       // Reset animation state on error
       setIsAnimating(false);
       setAnimationDirection(null);
       setDragX(0);
-    },
+    }
   });
 
   // 觸發移除動畫
@@ -56,8 +50,7 @@ export function RecommendationCard({
     setAnimationDirection(direction);
 
     // 計算最終位置（完全移出螢幕）
-    const finalX =
-      direction === "left" ? -window.innerWidth : window.innerWidth;
+    const finalX = direction === "left" ? -window.innerWidth : window.innerWidth;
     setDragX(finalX);
 
     // 動畫結束後觸發回調
@@ -160,18 +153,18 @@ export function RecommendationCard({
       // 右滑 - 綠色背景
       return {
         className: "bg-green-500",
-        style: { opacity },
+        style: { opacity }
       };
     } else if (dragX < 0) {
       // 左滑 - 紅色背景
       return {
         className: "bg-red-500",
-        style: { opacity },
+        style: { opacity }
       };
     }
     return {
       className: "",
-      style: { opacity: 0 },
+      style: { opacity: 0 }
     };
   };
 
@@ -181,10 +174,7 @@ export function RecommendationCard({
   return (
     <div className="relative overflow-hidden rounded-lg">
       {/* 背景指示器 */}
-      <div
-        className={`absolute inset-0 flex items-center justify-center rounded-lg ${swipeStyle.className}`}
-        style={swipeStyle.style}
-      >
+      <div className={`absolute inset-0 flex items-center justify-center rounded-lg ${swipeStyle.className}`} style={swipeStyle.style}>
         {dragX > 50 && !isAnimating && <Plus className="w-8 h-8 text-white" />}
         {dragX < -50 && !isAnimating && <X className="w-8 h-8 text-white" />}
         {isAnimating && animationDirection === "right" && (
@@ -193,21 +183,15 @@ export function RecommendationCard({
             <span className="text-white font-medium">加入中...</span>
           </div>
         )}
-        {isAnimating && animationDirection === "left" && (
-          <X className="w-8 h-8 text-white" />
-        )}
+        {isAnimating && animationDirection === "left" && <X className="w-8 h-8 text-white" />}
       </div>
 
       {/* 卡片內容 */}
       <Card
         ref={cardRef}
-        className={`w-full max-w-sm cursor-grab active:cursor-grabbing ${
-          isAnimating
-            ? "transition-transform duration-300 ease-out"
-            : "transition-transform duration-200 ease-out"
-        }`}
+        className={`w-full max-w-sm cursor-grab active:cursor-grabbing ${isAnimating ? "transition-transform duration-300 ease-out" : "transition-transform duration-200 ease-out"}`}
         style={{
-          transform: `translateX(${dragX}px)`,
+          transform: `translateX(${dragX}px)`
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -230,9 +214,7 @@ export function RecommendationCard({
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground mt-1">
-            {displayDefinition}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">{displayDefinition}</p>
         </CardContent>
       </Card>
     </div>

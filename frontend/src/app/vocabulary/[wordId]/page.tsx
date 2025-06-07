@@ -36,27 +36,29 @@ export default function WordPage() {
     mutationFn: deleteWord,
     onSuccess: () => {
       toast.success("單字已成功刪除");
-      
+
       // Optimistically update the vocabulary list cache
-      queryClient.setQueryData(["vocabulary"], (oldData: any) => {
-        if (!oldData || !oldData.words) return oldData;
-        
-        const filteredWords = oldData.words.filter((word: any) => word.id !== wordId);
-        
+      queryClient.setQueryData(["vocabulary"], (oldData: unknown) => {
+        if (!oldData || typeof oldData !== "object" || !("words" in oldData))
+          return oldData;
+
+        const data = oldData as { words: Array<{ id: string }>; total: number };
+        const filteredWords = data.words.filter((word) => word.id !== wordId);
+
         return {
-          ...oldData,
+          ...data,
           words: filteredWords,
-          total: Math.max(0, oldData.total - 1), // Update total count
+          total: Math.max(0, data.total - 1), // Update total count
         };
       });
-      
+
       // Navigate back to vocabulary list immediately
       router.push("/vocabulary");
-      
+
       // Invalidate after navigation to ensure data consistency in background
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error?.message || "刪除單字失敗");
     },
   });

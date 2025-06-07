@@ -15,60 +15,45 @@ interface AudioPlayerProps {
 }
 
 // Helper function to extract detailed error information
-const getDetailedErrorMessage = (
-  error: any,
-  context: string,
-  audioUrl: string,
-  newsId: string
-): string => {
+const getDetailedErrorMessage = (error: Error | unknown, context: string, audioUrl: string, newsId: string): string => {
   let fullMessage = `${context} (新聞 ID: ${newsId})`;
 
-  if (error?.message) {
-    fullMessage += `: ${error.message}`;
+  if (error && typeof error === "object" && "message" in error) {
+    fullMessage += `: ${(error as Error).message}`;
   }
 
-  if (error?.name && error.name !== "Error") {
-    fullMessage += ` (${error.name})`;
+  if (error && typeof error === "object" && "name" in error && (error as Error).name !== "Error") {
+    fullMessage += ` (${(error as Error).name})`;
   }
 
-  if (error?.code) {
-    fullMessage += ` [Code: ${error.code}]`;
+  if (error && typeof error === "object" && "code" in error) {
+    fullMessage += ` [Code: ${(error as { code: unknown }).code}]`;
   }
 
   fullMessage += ` | URL: ${audioUrl}`;
 
   // Add helpful suggestions based on error type
-  if (error?.message?.includes("timeout") || error?.name === "TimeoutError") {
+  const errorMessage = error && typeof error === "object" && "message" in error ? (error as Error).message : "";
+  const errorName = error && typeof error === "object" && "name" in error ? (error as Error).name : "";
+
+  if (errorMessage?.includes("timeout") || errorName === "TimeoutError") {
     fullMessage += ` | 建議: 檢查網路連線或音訊檔案大小`;
-  } else if (
-    error?.message?.includes("404") ||
-    error?.message?.includes("Not Found")
-  ) {
+  } else if (errorMessage?.includes("404") || errorMessage?.includes("Not Found")) {
     fullMessage += ` | 建議: 檢查音訊檔案是否存在`;
-  } else if (error?.message?.includes("CORS") || error?.name === "TypeError") {
+  } else if (errorMessage?.includes("CORS") || errorName === "TypeError") {
     fullMessage += ` | 建議: 音訊伺服器需要設定 CORS 標頭`;
-  } else if (error?.name === "NotAllowedError") {
+  } else if (errorName === "NotAllowedError") {
     fullMessage += ` | 建議: 點擊播放按鈕開始播放`;
-  } else if (error?.name === "NotSupportedError") {
+  } else if (errorName === "NotSupportedError") {
     fullMessage += ` | 建議: 瀏覽器不支援此音訊格式`;
   }
 
   return fullMessage;
 };
 
-export const AudioPlayer: React.FC<AudioPlayerProps> = ({
-  audioUrl,
-  newsId,
-  className,
-}) => {
+export const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, newsId, className }) => {
   // React Query for URL validation
-  const {
-    data: audioData,
-    error: validationError,
-    isLoading: isValidating,
-    isError: hasValidationError,
-    refetch: refetchValidation,
-  } = useAudioValidation(audioUrl, newsId);
+  const { data: audioData, error: validationError, isLoading: isValidating, isError: hasValidationError, refetch: refetchValidation } = useAudioValidation(audioUrl, newsId);
 
   // Audio playback state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -84,12 +69,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   // Handle React Query validation errors
   useEffect(() => {
     if (hasValidationError && validationError) {
-      let errorMessage = getDetailedErrorMessage(
-        validationError,
-        "音訊連結驗證失敗",
-        audioUrl,
-        newsId
-      );
+      let errorMessage = getDetailedErrorMessage(validationError, "音訊連結驗證失敗", audioUrl, newsId);
       errorMessage += ` | 已重試 2 次後失敗`;
       toast.error(errorMessage);
       setAudioError("驗證失敗");
@@ -173,10 +153,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       audio.src = audioUrl;
 
       // Auto-detect and set content type
-      const detectedType = detectAudioContentType(
-        audioUrl,
-        audioData.contentType
-      );
+      const detectedType = detectAudioContentType(audioUrl, audioData.contentType);
       if (detectedType) {
         audio.setAttribute("type", detectedType);
       }
@@ -191,7 +168,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         audio.removeEventListener("loadstart", handleLoadStart);
       };
     }
-  }, [audioData?.isValid, audioUrl, newsId]);
+  }, [audioData?.isValid, audioData?.contentType, audioUrl, newsId]);
 
   // Play/Pause handler
   const handlePlayPause = useCallback(async () => {
@@ -205,13 +182,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         await audioRef.current.play();
         setIsPlaying(true);
       }
-    } catch (error: any) {
-      const errorMessage = getDetailedErrorMessage(
-        error,
-        "播放失敗",
-        audioUrl,
-        newsId
-      );
+    } catch (error: unknown) {
+      const errorMessage = getDetailedErrorMessage(error, "播放失敗", audioUrl, newsId);
       toast.error(errorMessage);
       setIsPlaying(false);
     }
@@ -251,23 +223,11 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           {/* Play/Pause Button */}
           <div className="flex-shrink-0">
             {hasError ? (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleRetry}
-                disabled={isLoading}
-                className="h-10 w-10"
-              >
+              <Button variant="outline" size="icon" onClick={handleRetry} disabled={isLoading} className="h-10 w-10">
                 <RotateCcw className="h-4 w-4" />
               </Button>
             ) : (
-              <Button
-                variant="default"
-                size="icon"
-                onClick={handlePlayPause}
-                disabled={isLoading || !isAudioReady}
-                className="h-10 w-10 text-foreground"
-              >
+              <Button variant="default" size="icon" onClick={handlePlayPause} disabled={isLoading || !isAudioReady} className="h-10 w-10 text-foreground">
                 {isLoading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 ) : isPlaying ? (
