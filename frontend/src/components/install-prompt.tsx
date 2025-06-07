@@ -23,7 +23,7 @@ export function InstallPrompt() {
 
   useEffect(() => {
     // Check if it's iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window);
     setIsIOS(isIOSDevice);
 
     // Check if app is already installed (standalone mode)
@@ -113,7 +113,7 @@ export function InstallPrompt() {
               Install App
             </Button>
             <p className="text-xs text-muted-foreground">
-              To install: Tap the Share button <span className="inline-block">📤</span> in Safari, then select "Add to Home Screen" <span className="inline-block">➕</span>
+              To install: Tap the Share button <span className="inline-block">📤</span> in Safari, then select &ldquo;Add to Home Screen&rdquo; <span className="inline-block">➕</span>
             </p>
           </div>
         ) : (
