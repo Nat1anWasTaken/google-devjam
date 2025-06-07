@@ -170,13 +170,7 @@ export default function UserPage() {
                       optimisticLevel && "scale-110"
                     )}
                   >
-                    {updateLevelMutation.isPending ? (
-                      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-                        <LoaderCircle className="size-8 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : (
-                      "Level " + level
-                    )}
+                    {updateLevelMutation.isPending ? <LoaderCircle className="size-8 animate-spin text-muted-foreground" /> : "Level " + level}
                   </div>
 
                   {/* Increase Button */}
