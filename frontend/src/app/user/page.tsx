@@ -80,7 +80,7 @@ export default function UserPage() {
       // Perform mutation in background
       try {
         await updateLevelMutation.mutateAsync(newLevel);
-      } catch (error) {}
+      } catch (_) {}
     }
   };
 
