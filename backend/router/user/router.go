@@ -8,11 +8,11 @@ import (
 
 func InitUserRouter(e *echo.Echo) {
 	// Public routes
-	e.GET("/me", Me)
 
 	// Protected routes for user preferences
 	userGroup := e.Group("/user", middleware.JWTMiddleware())
-
+	// Get user info
+	userGroup.GET("/me", Me)
 	// CRUD operations for user preferences
 	userGroup.GET("/preferences", GetPreferences)       // GET /user/preferences - Get user preferences
 	userGroup.POST("/preferences", CreatePreferences)   // POST /user/preferences - Create user preferences

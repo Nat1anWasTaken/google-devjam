@@ -409,8 +409,8 @@
       },
       "put": {
         "tags": ["Vocabulary"],
-        "summary": "Update word properties",
-        "description": "Update the difficulty level, part of speech, examples, or root word of a word in the user's vocabulary",
+        "summary": "Update user word data",
+        "description": "Update user-specific word data including learn count, fluency level, and examples for a word in the user's vocabulary",
         "operationId": "updateWord",
         "security": [
           {
@@ -437,10 +437,9 @@
                 "$ref": "#/components/schemas/UpdateWordRequest"
               },
               "example": {
-                "difficulty": 5,
-                "part_of_speech": "interjection",
-                "examples": ["Hello, how are you?", "Say hello to your friend."],
-                "root_word": "hello"
+                "learn_count": 10,
+                "fluency": 85,
+                "examples": ["Hello, how are you?", "Say hello to your friend."]
               }
             }
           }
@@ -479,10 +478,16 @@
                       "error": "Invalid request format"
                     }
                   },
-                  "invalid_difficulty": {
-                    "summary": "Invalid difficulty range",
+                  "invalid_learn_count": {
+                    "summary": "Invalid learn count",
                     "value": {
-                      "error": "Difficulty must be between 1 and 10"
+                      "error": "Learn count cannot be negative"
+                    }
+                  },
+                  "invalid_fluency": {
+                    "summary": "Invalid fluency range",
+                    "value": {
+                      "error": "Fluency must be between 0 and 100"
                     }
                   }
                 }
@@ -1336,17 +1341,18 @@
       "UpdateWordRequest": {
         "type": "object",
         "properties": {
-          "difficulty": {
+          "learn_count": {
             "type": "integer",
-            "description": "Difficulty level of the word",
-            "minimum": 1,
-            "maximum": 10,
-            "example": 5
+            "description": "User's learn count for this word",
+            "minimum": 0,
+            "example": 10
           },
-          "part_of_speech": {
-            "type": "string",
-            "description": "Part of speech (noun, verb, adjective, etc.)",
-            "example": "noun"
+          "fluency": {
+            "type": "integer",
+            "description": "User's fluency level with this word",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 85
           },
           "examples": {
             "type": "array",
@@ -1355,11 +1361,6 @@
             },
             "description": "Example sentences using this word (replaces all existing examples)",
             "example": ["Hello, how are you?", "Say hello to your friend."]
-          },
-          "root_word": {
-            "type": "string",
-            "description": "Root form of the word (e.g., 'run' for 'ran')",
-            "example": "run"
           }
         }
       },

@@ -1,0 +1,43 @@
+[project]
+name = "neural-tts-server"
+version = "1.0.0"
+description = "Advanced Neural TTS Server using Coqui TTS"
+readme = "README.md"
+requires-python = ">=3.8,<3.12"
+dependencies = [
+    "flask",
+    "torch",
+    "torchaudio", 
+    "TTS>=0.20.0",
+    "librosa",
+    "soundfile", 
+    "numpy>1.21.6",
+    "scipy",
+    "setuptools",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "black>=23.0.0", 
+    "isort>=5.12.0",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 100 

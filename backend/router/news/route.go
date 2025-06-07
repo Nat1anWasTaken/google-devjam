@@ -11,7 +11,8 @@ func InitRoutes(e *echo.Echo) {
 	newsGroup := e.Group("/news", middleware.JWTMiddleware())
 
 	// News generation endpoint
-	newsGroup.POST("/generate", GenerateNews) // POST /news/generate - Generate personalized news
+	newsGroup.POST("/generate", GenerateNews)            // POST /news/generate - Generate personalized news
+	newsGroup.POST("/force-generate", ForceGenerateNews) // POST /news/force-generate - Force generate 4 new news articles
 
 	// News retrieval endpoints
 	newsGroup.GET("", GetNews)           // GET /news - Get news articles with pagination and filtering

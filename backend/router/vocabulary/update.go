@@ -17,10 +17,10 @@ import (
 )
 
 type UpdateWordRequest struct {
-	Difficulty   int      `json:"difficulty,omitempty"`
-	PartOfSpeech string   `json:"part_of_speech,omitempty"`
-	Examples     []string `json:"examples,omitempty"`
-	RootWord     string   `json:"root_word,omitempty"`
+	// User-specific word properties
+	LearnCount *int     `json:"learn_count,omitempty"`
+	Fluency    *int     `json:"fluency,omitempty"`
+	Examples   []string `json:"examples,omitempty"`
 }
 
 type LearnWordRequest struct {
@@ -100,13 +100,6 @@ func UpdateWord(c echo.Context) error {
 		})
 	}
 
-	// Validate difficulty if provided
-	if req.Difficulty != 0 && (req.Difficulty < 1 || req.Difficulty > 10) {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Difficulty must be between 1 and 10",
-		})
-	}
-
 	// Check if user owns this word
 	userWordsCollection := mongodb.GetCollection("user_words")
 	if userWordsCollection == nil {
@@ -137,20 +130,41 @@ func UpdateWord(c echo.Context) error {
 		"updated_at": time.Now(),
 	}
 
-	// Update the user word
-	_, err = userWordsCollection.UpdateOne(
-		context.Background(),
-		bson.M{
-			"user_id": userID,
-			"word_id": wordID,
-		},
-		bson.M{"$set": updateData},
-	)
+	// Add user-specific fields if provided
+	if req.LearnCount != nil {
+		if *req.LearnCount < 0 {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Learn count cannot be negative",
+			})
+		}
+		updateData["learn_count"] = *req.LearnCount
+	}
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to update user word",
-		})
+	if req.Fluency != nil {
+		if *req.Fluency < 0 || *req.Fluency > 100 {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Fluency must be between 0 and 100",
+			})
+		}
+		updateData["fluency"] = *req.Fluency
+	}
+
+	// Update the user word (only if there are changes beyond updated_at)
+	if len(updateData) > 1 {
+		_, err = userWordsCollection.UpdateOne(
+			context.Background(),
+			bson.M{
+				"user_id": userID,
+				"word_id": wordID,
+			},
+			bson.M{"$set": updateData},
+		)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to update user word",
+			})
+		}
 	}
 
 	// Update examples if provided
@@ -158,42 +172,6 @@ func UpdateWord(c echo.Context) error {
 		if err := updateWordExamples(wordID, req.Examples); err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "Failed to update word examples",
-			})
-		}
-	}
-
-	// Update the word's global properties if provided
-	if req.Difficulty != 0 || req.PartOfSpeech != "" || req.RootWord != "" {
-		wordsCollection := mongodb.GetCollection("words")
-		if wordsCollection == nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "Database connection error",
-			})
-		}
-
-		wordUpdateData := bson.M{
-			"updated_at": time.Now(),
-		}
-
-		if req.Difficulty != 0 {
-			wordUpdateData["difficulty"] = req.Difficulty
-		}
-		if req.PartOfSpeech != "" {
-			wordUpdateData["part_of_speech"] = req.PartOfSpeech
-		}
-		if req.RootWord != "" {
-			wordUpdateData["root_word"] = req.RootWord
-		}
-
-		_, err = wordsCollection.UpdateOne(
-			context.Background(),
-			bson.M{"_id": wordID},
-			bson.M{"$set": wordUpdateData},
-		)
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "Failed to update word properties",
 			})
 		}
 	}

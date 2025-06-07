@@ -2,7 +2,9 @@ package news
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -16,14 +18,16 @@ import (
 	"google-devjam-backend/utils/gemini"
 	"google-devjam-backend/utils/middleware"
 	"google-devjam-backend/utils/mongodb"
+	"google-devjam-backend/utils/services"
 )
 
 type GenerateNewsResponse struct {
-	News model.News `json:"news"`
+	AllNews []model.News `json:"all_news"`
 }
 
 // GenerateNews generates personalized news based on user preferences and vocabulary
-// If user has news generated within 4 hours, returns existing news instead of generating new one
+// If user has less than 4 news, generates enough to reach 4 total
+// If user has 4+ news, generates 4 new articles every 4 hours
 func GenerateNews(c echo.Context) error {
 	// Get user info from context
 	userID, _ := middleware.GetUserFromContext(c)
@@ -33,29 +37,47 @@ func GenerateNews(c echo.Context) error {
 		})
 	}
 
-	// Step 1: Check if user has recent news (within 4 hours)
-	recentNews, err := getRecentUserNews(userID)
+	// Step 1: Get all existing user news
+	allNews, err := getAllUserNews(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to check recent news: " + err.Error(),
+			"error": "Failed to get user news: " + err.Error(),
 		})
 	}
 
-	// If recent news exists, return it instead of generating new one
-	if recentNews != nil {
-		return c.JSON(http.StatusOK, GenerateNewsResponse{
-			News: *recentNews,
-		})
+	// Step 2: Determine how many news to generate
+	var newsToGenerate int
+	if len(allNews) < 4 {
+		// Generate enough news to reach 4 total
+		newsToGenerate = 4 - len(allNews)
+	} else {
+		// Check if user has recent news (within 4 hours)
+		recentNews, err := getRecentUserNews(userID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to check recent news: " + err.Error(),
+			})
+		}
+
+		// If recent news exists, return existing news without generating new ones
+		if recentNews != nil {
+			return c.JSON(http.StatusOK, GenerateNewsResponse{
+				AllNews: allNews,
+			})
+		}
+
+		// Generate 4 new articles since no recent news found (every 4 hours)
+		newsToGenerate = 4
 	}
 
-	// Step 2: Get user preferences
+	// Step 3: Get user preferences
 	userPreferences, err := getUserPreferences(userID)
 	if err != nil {
 		// Continue without preferences if not found, but log the error
 		userPreferences = nil
 	}
 
-	// Step 3: Get user's vocabulary words for learning and review
+	// Step 4: Get user's vocabulary words for learning and review
 	learnWords, reviewWords, err := getUserVocabularyForNews(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -63,46 +85,7 @@ func GenerateNews(c echo.Context) error {
 		})
 	}
 
-	// Step 4: Generate news using Gemini
-	newsReq := gemini.NewsGenerationRequest{
-		UserPreferences: userPreferences,
-		LearnWords:      learnWords,
-		ReviewWords:     reviewWords,
-	}
-
-	newsResult, err := gemini.GeneratePersonalizedNews(newsReq)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate news: " + err.Error(),
-		})
-	}
-
-	// Step 5: Store the generated news in the database
-	newsID, err := encrypt.GenerateSnowflakeID()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate news ID",
-		})
-	}
-
-	// Combine learning and review words that were sent to Gemini
-	allVocabWords := append(learnWords, reviewWords...)
-
-	now := time.Now()
-	news := model.News{
-		ID:         newsID,
-		UserID:     userID,
-		Title:      newsResult.Title,
-		Content:    newsResult.Content,
-		Level:      newsResult.Level,
-		Keywords:   newsResult.Keywords,
-		WordInNews: allVocabWords, // Use the words we sent to Gemini, not what Gemini returns
-		Source:     newsResult.Source,
-		CreatedAt:  now,
-		UpdatedAt:  now,
-	}
-
-	// Insert news into database
+	// Step 5: Generate the required number of news
 	newsCollection := mongodb.GetCollection("news")
 	if newsCollection == nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -110,15 +93,101 @@ func GenerateNews(c echo.Context) error {
 		})
 	}
 
-	_, err = newsCollection.InsertOne(context.Background(), news)
+	for i := 0; i < newsToGenerate; i++ {
+		// Get existing titles to avoid duplicate topics
+		existingTitles := make([]string, len(allNews))
+		for j, news := range allNews {
+			existingTitles[j] = news.Title
+		}
+
+		// Generate news using Gemini
+		newsReq := gemini.NewsGenerationRequest{
+			UserPreferences: userPreferences,
+			LearnWords:      learnWords,
+			ReviewWords:     reviewWords,
+			ExistingTitles:  existingTitles,
+		}
+
+		newsResult, err := gemini.GeneratePersonalizedNews(newsReq)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to generate news: " + err.Error(),
+			})
+		}
+
+		// Generate news ID
+		newsID, err := encrypt.GenerateSnowflakeID()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to generate news ID",
+			})
+		}
+
+		// Combine learning and review words that were sent to Gemini
+		allVocabWords := append(learnWords, reviewWords...)
+
+		// Convert level from string to int
+		level, err := strconv.Atoi(newsResult.Level)
+		if err != nil {
+			log.Printf("Warning: Failed to parse level '%s', defaulting to 1: %v", newsResult.Level, err)
+			level = 1 // Default to level 1 if parsing fails
+		}
+
+		now := time.Now()
+		news := model.News{
+			ID:         newsID,
+			UserID:     userID,
+			Title:      newsResult.Title,
+			Content:    newsResult.Content,
+			Level:      level,
+			Keywords:   newsResult.Keywords,
+			WordInNews: allVocabWords, // Use the words we sent to Gemini, not what Gemini returns
+			Source:     newsResult.Source,
+			CreatedAt:  now,
+			UpdatedAt:  now,
+		}
+
+		// Generate and store audio for the news content
+		audioService, err := services.NewAudioService()
+		if err != nil {
+			log.Printf("Warning: Failed to initialize audio service: %v", err)
+			// Continue without audio generation
+		} else {
+			// Generate audio from the news content
+			audioURL, audioKey, err := audioService.GenerateAndStoreAudio(newsResult.Content, newsID)
+			if err != nil {
+				log.Printf("Warning: Failed to generate audio for news %s: %v", newsID, err)
+				// Continue without audio - don't fail the entire operation
+			} else {
+				// Add audio information to the news
+				news.AudioURL = audioURL
+				news.AudioKey = audioKey
+				log.Printf("Audio generated successfully for news %s: %s", newsID, audioURL)
+			}
+		}
+
+		// Insert news into database
+		_, err = newsCollection.InsertOne(context.Background(), news)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to store news: " + err.Error(),
+			})
+		}
+
+		// Add the newly generated news to allNews for the next iteration
+		allNews = append([]model.News{news}, allNews...)
+	}
+
+	// Get all user news including the newly generated ones
+	updatedAllNews, err := getAllUserNews(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to store news: " + err.Error(),
+			"error": "Failed to get all user news: " + err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusCreated, GenerateNewsResponse{
-		News: news,
+		AllNews: updatedAllNews,
 	})
 }
 
@@ -247,6 +316,35 @@ func getUserVocabularyForNews(userID string) (learnWords []string, reviewWords [
 	return learnWords, reviewWords, nil
 }
 
+// getAllUserNews finds all the news for this specific user
+func getAllUserNews(userID string) ([]model.News, error) {
+	newsCollection := mongodb.GetCollection("news")
+	if newsCollection == nil {
+		return nil, mongo.ErrClientDisconnected
+	}
+
+	// Find all the news for this specific user
+	cursor, err := newsCollection.Find(
+		context.Background(),
+		bson.M{"user_id": userID},
+		&options.FindOptions{
+			Sort: bson.D{{Key: "created_at", Value: -1}}, // Get the most recent first
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var newsList []model.News
+	if err := cursor.All(context.Background(), &newsList); err != nil {
+		return nil, err
+	}
+
+	return newsList, nil
+}
+
 // getRecentUserNews checks if user has news generated within the last 4 hours
 func getRecentUserNews(userID string) (*model.News, error) {
 	newsCollection := mongodb.GetCollection("news")
@@ -257,7 +355,6 @@ func getRecentUserNews(userID string) (*model.News, error) {
 	// Calculate 4 hours ago
 	fourHoursAgo := time.Now().Add(-4 * time.Hour)
 
-	// Find the most recent news for this specific user within 4 hours
 	var news model.News
 	err := newsCollection.FindOne(
 		context.Background(),
@@ -280,4 +377,149 @@ func getRecentUserNews(userID string) (*model.News, error) {
 	}
 
 	return &news, nil
+}
+
+// ForceGenerateNews generates 4 new personalized news articles regardless of existing news
+func ForceGenerateNews(c echo.Context) error {
+	// Get user info from context
+	userID, _ := middleware.GetUserFromContext(c)
+	if userID == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "User not authenticated",
+		})
+	}
+
+	// Step 1: Get all existing user news for context
+	allNews, err := getAllUserNews(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to get user news: " + err.Error(),
+		})
+	}
+
+	// Step 2: Get user preferences
+	userPreferences, err := getUserPreferences(userID)
+	if err != nil {
+		// Continue without preferences if not found, but log the error
+		userPreferences = nil
+	}
+
+	// Step 3: Get user's vocabulary words for learning and review
+	learnWords, reviewWords, err := getUserVocabularyForNews(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to get user vocabulary: " + err.Error(),
+		})
+	}
+
+	// Step 4: Generate 4 new articles
+	newsCollection := mongodb.GetCollection("news")
+	if newsCollection == nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Database connection error",
+		})
+	}
+
+	var newlyGeneratedNews []model.News
+
+	for i := 0; i < 4; i++ {
+		// Get existing titles to avoid duplicate topics
+		existingTitles := make([]string, len(allNews))
+		for j, news := range allNews {
+			existingTitles[j] = news.Title
+		}
+		// Also add titles from newly generated news in this batch
+		for _, news := range newlyGeneratedNews {
+			existingTitles = append(existingTitles, news.Title)
+		}
+
+		// Generate news using Gemini
+		newsReq := gemini.NewsGenerationRequest{
+			UserPreferences: userPreferences,
+			LearnWords:      learnWords,
+			ReviewWords:     reviewWords,
+			ExistingTitles:  existingTitles,
+		}
+
+		newsResult, err := gemini.GeneratePersonalizedNews(newsReq)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to generate news: " + err.Error(),
+			})
+		}
+
+		// Generate news ID
+		newsID, err := encrypt.GenerateSnowflakeID()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to generate news ID",
+			})
+		}
+
+		// Combine learning and review words that were sent to Gemini
+		allVocabWords := append(learnWords, reviewWords...)
+
+		// Convert level from string to int
+		level, err := strconv.Atoi(newsResult.Level)
+		if err != nil {
+			log.Printf("Warning: Failed to parse level '%s', defaulting to 1: %v", newsResult.Level, err)
+			level = 1 // Default to level 1 if parsing fails
+		}
+
+		now := time.Now()
+		news := model.News{
+			ID:         newsID,
+			UserID:     userID,
+			Title:      newsResult.Title,
+			Content:    newsResult.Content,
+			Level:      level,
+			Keywords:   newsResult.Keywords,
+			WordInNews: allVocabWords, // Use the words we sent to Gemini, not what Gemini returns
+			Source:     newsResult.Source,
+			CreatedAt:  now,
+			UpdatedAt:  now,
+		}
+
+		// Generate and store audio for the news content
+		audioService, err := services.NewAudioService()
+		if err != nil {
+			log.Printf("Warning: Failed to initialize audio service: %v", err)
+			// Continue without audio generation
+		} else {
+			// Generate audio from the news content
+			audioURL, audioKey, err := audioService.GenerateAndStoreAudio(newsResult.Content, newsID)
+			if err != nil {
+				log.Printf("Warning: Failed to generate audio for news %s: %v", newsID, err)
+				// Continue without audio - don't fail the entire operation
+			} else {
+				// Add audio information to the news
+				news.AudioURL = audioURL
+				news.AudioKey = audioKey
+				log.Printf("Audio generated successfully for news %s: %s", newsID, audioURL)
+			}
+		}
+
+		// Insert news into database
+		_, err = newsCollection.InsertOne(context.Background(), news)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to store news: " + err.Error(),
+			})
+		}
+
+		// Add to newly generated news list
+		newlyGeneratedNews = append(newlyGeneratedNews, news)
+	}
+
+	// Get all user news including the newly generated ones
+	updatedAllNews, err := getAllUserNews(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to get all user news: " + err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, GenerateNewsResponse{
+		AllNews: updatedAllNews,
+	})
 }
