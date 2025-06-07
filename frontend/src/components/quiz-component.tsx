@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "./ui/card";
 import { Check, X } from "lucide-react";
@@ -69,22 +69,22 @@ export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps
     setIsDragging(true);
   };
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || isAnimating) return;
 
     currentX.current = e.touches[0].clientX;
     const currentY = e.touches[0].clientY;
     const diffX = currentX.current - startX.current;
     const diffY = currentY - startY.current;
-
+    
     // Determine if this is a horizontal or vertical gesture
     const isHorizontalGesture = Math.abs(diffX) > Math.abs(diffY);
-
+    
     // Prevent vertical scrolling when horizontal swipe is detected
     if (isHorizontalGesture && Math.abs(diffX) > 10) {
       e.preventDefault();
     }
-
+    
     // Only update dragX for horizontal gestures
     if (isHorizontalGesture) {
       setDragX(diffX);
@@ -114,10 +114,9 @@ export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps
     if (isAnimating) return;
     startX.current = e.clientX;
     setIsDragging(true);
-    e.preventDefault(); // Prevent text selection
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || isAnimating) return;
 
     currentX.current = e.clientX;
@@ -141,25 +140,6 @@ export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps
 
     setIsDragging(false);
   };
-
-  // Add global event listeners for touch and mouse events
-  useEffect(() => {
-    if (isDragging) {
-      // Add global listeners
-      document.addEventListener("touchmove", handleTouchMove, { passive: false });
-      document.addEventListener("touchend", handleTouchEnd);
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-
-      return () => {
-        // Cleanup listeners
-        document.removeEventListener("touchmove", handleTouchMove);
-        document.removeEventListener("touchend", handleTouchEnd);
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging, dragX, isAnimating]); // Include dependencies
 
   // 計算透明度和背景類別
   const getSwipeClasses = () => {
@@ -220,7 +200,12 @@ export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps
           transform: `translateX(${dragX}px)`
         }}
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp} // 處理鼠標離開的情況
       >
         <CardContent>
           <div className="flex flex-col justify-center items-start gap-4">
