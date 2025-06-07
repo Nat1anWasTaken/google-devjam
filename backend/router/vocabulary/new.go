@@ -229,8 +229,8 @@ func CreateWord(c echo.Context) error {
 		Definition_zh: translation.DefinitionZh,
 		Definition_en: translation.DefinitionEn,
 		Difficulty:    difficulty,
-		PartOfSpeech:  "", // TODO: Add part of speech detection to Gemini
-		RootWord:      "", // TODO: Add root word detection to Gemini
+		PartOfSpeech:  translation.PartOfSpeech,
+		RootWord:      translation.RootWord,
 		CreatedAt:     now,
 		UpdatedAt:     now,
 	}
