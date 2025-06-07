@@ -1,5 +1,5 @@
 "use client";
 
 export function Vocabulary() {
-  return <></>;
+  return <div className="flex flex-col h"></div>;
 }

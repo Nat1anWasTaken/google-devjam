@@ -3,7 +3,40 @@ import { RegisterData } from "@/components/register-form";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
 
-export async function registerUser(userData: RegisterData): Promise<User> {
+type LoginResponse = User & {
+  token: string;
+};
+
+type RegisterResponse = LoginResponse;
+
+// Token management utilities
+export function getStoredToken(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("auth_token");
+  }
+  return null;
+}
+
+export function storeToken(token: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("auth_token", token);
+  }
+}
+
+export function removeStoredToken(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("auth_token");
+  }
+}
+
+export function logout(): void {
+  removeStoredToken();
+  // You can also call a backend logout endpoint here if needed
+}
+
+export async function registerUser(
+  userData: RegisterData
+): Promise<RegisterResponse> {
   const response = await fetch(`${baseUrl}/auth/register`, {
     credentials: "include",
     method: "POST",
@@ -24,9 +57,11 @@ export async function registerUser(userData: RegisterData): Promise<User> {
     throw error;
   }
 
-  return await response.json();
+  const data = await response.json();
+  return data;
 }
-export async function loginUser(userData: LoginData): Promise<User> {
+
+export async function loginUser(userData: LoginData): Promise<LoginResponse> {
   const response = await fetch(`${baseUrl}/auth/login`, {
     credentials: "include",
     method: "POST",
@@ -41,38 +76,40 @@ export async function loginUser(userData: LoginData): Promise<User> {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to login");
+    const error = new Error(errorData.message || "Failed to login");
+    (error as any).fullResponse = errorData;
+    throw error;
   }
 
-  return await response.json();
+  const data = await response.json();
+  return data;
 }
 
 export async function getUser(): Promise<User | null> {
+  const token = getStoredToken();
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  // Add authorization header if token exists
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${baseUrl}/auth/me`, {
     credentials: "include",
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
-  // if (!response.ok) {
-  //   if (response.status === 401) {
-  //     return null; // User not authenticated
-  //   }
-  //   const errorData = await response.json();
-  //   throw new Error(errorData.message || "Failed to fetch user");
-  // }
+  if (!response.ok) {
+    if (response.status === 401) {
+      return null; // User not authenticated
+    }
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch user");
+  }
 
-  // return (await response.json()) as User;
-
-  return {
-    // Mock the user before backend is ready.
-    id: "1",
-    display_name: "John Doe",
-    email: "",
-    password: "",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  } as User;
+  return (await response.json()) as User;
 }

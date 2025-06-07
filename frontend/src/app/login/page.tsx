@@ -1,7 +1,7 @@
 "use client";
 
 import { LoginData, LoginForm } from "@/components/login-form";
-import { loginUser } from "@/lib/api/auth";
+import { loginUser, storeToken } from "@/lib/api/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -13,6 +13,12 @@ export default function LoginPage() {
     mutationFn: loginUser,
     onSuccess: (data) => {
       console.log("Login successful:", data);
+
+      // Store token in localStorage if present
+      if (data.token) {
+        storeToken(data.token);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       router.push("/");
     },

@@ -1,6 +1,6 @@
 "use client";
 
-import { getUser } from "@/lib/api/auth";
+import { getUser, removeStoredToken } from "@/lib/api/auth";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -32,6 +32,7 @@ export default function useAuth({
       !query.isError &&
       query.data === null
     ) {
+      removeStoredToken();
       router.push("/login");
     }
   }, [
