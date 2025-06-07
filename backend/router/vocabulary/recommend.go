@@ -39,8 +39,15 @@ func GetRecommendations(c echo.Context) error {
 		})
 	}
 
-	// Step 2: Get recommendations from Gemini
-	recommendations, err := gemini.GetWordRecommendations(userWords)
+	// Step 2: Get user preferences to enhance recommendations
+	userPreferences, err := getUserPreferences(userID)
+	if err != nil {
+		// Continue without preferences if not found
+		userPreferences = nil
+	}
+
+	// Step 3: Get recommendations from Gemini
+	recommendations, err := gemini.GetWordRecommendationsWithPreferences(userWords, userPreferences)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to get recommendations: " + err.Error(),
@@ -183,7 +190,7 @@ func processRecommendedWord(word, userID string) (*WordWithUserData, error) {
 		return nil, nil
 	}
 
-	if translation.Definition == "" {
+	if translation.DefinitionEn == "" || translation.DefinitionZh == "" {
 		// Skip words without definition
 		return nil, nil
 	}
@@ -203,14 +210,16 @@ func processRecommendedWord(word, userID string) (*WordWithUserData, error) {
 	// Create new word
 	now := time.Now()
 	newWord := model.Word{
-		ID:           wordID,
-		Word:         word,
-		Definition:   translation.Definition,
-		Difficulty:   difficulty,
-		PartOfSpeech: "", // TODO: Add part of speech detection to Gemini
-		RootWord:     "", // TODO: Add root word detection to Gemini
-		CreatedAt:    now,
-		UpdatedAt:    now,
+		ID:            wordID,
+		Word:          word,
+		Translation:   translation.Translation,
+		Definition_zh: translation.DefinitionZh,
+		Definition_en: translation.DefinitionEn,
+		Difficulty:    difficulty,
+		PartOfSpeech:  "", // TODO: Add part of speech detection to Gemini
+		RootWord:      "", // TODO: Add root word detection to Gemini
+		CreatedAt:     now,
+		UpdatedAt:     now,
 	}
 
 	// Insert word into global words collection
@@ -278,4 +287,20 @@ func addToRecommendWords(userID, wordID string) error {
 
 	_, err = recommendWordsCollection.InsertOne(context.Background(), recommendWord)
 	return err
+}
+
+// getUserPreferences retrieves user preferences
+func getUserPreferences(userID string) (*model.UserPreferences, error) {
+	preferencesCollection := mongodb.GetCollection("user_preferences")
+	if preferencesCollection == nil {
+		return nil, mongo.ErrClientDisconnected
+	}
+
+	var preferences model.UserPreferences
+	err := preferencesCollection.FindOne(context.Background(), bson.M{"user_id": userID}).Decode(&preferences)
+	if err != nil {
+		return nil, err
+	}
+
+	return &preferences, nil
 }

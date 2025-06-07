@@ -51,8 +51,12 @@
                   "word": {
                     "id": "1234567890123456789",
                     "word": "hello",
-                    "definition": "你好",
+                    "translation": "你好",
+                    "definition_zh": "你好",
+                    "definition_en": "A greeting used when meeting someone",
                     "difficulty": 2,
+                    "part_of_speech": "interjection",
+                    "root_word": "hello",
                     "created_at": "2024-01-15T10:30:00Z",
                     "updated_at": "2024-01-15T10:30:00Z"
                   }
@@ -232,7 +236,9 @@
                     {
                       "id": "1234567890123456789",
                       "word": "hello",
-                      "definition": "你好",
+                      "translation": "你好",
+                      "definition_zh": "你好",
+                      "definition_en": "A greeting used when meeting someone",
                       "difficulty": 2,
                       "part_of_speech": "interjection",
                       "root_word": "hello",
@@ -319,16 +325,29 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WordResponse"
+                  "$ref": "#/components/schemas/WordWithUserDataResponse"
                 },
                 "example": {
                   "word": {
                     "id": "1234567890123456789",
                     "word": "hello",
-                    "definition": "你好",
+                    "translation": "你好",
+                    "definition_zh": "你好",
+                    "definition_en": "A greeting used when meeting someone",
                     "difficulty": 2,
+                    "part_of_speech": "interjection",
+                    "root_word": "hello",
                     "created_at": "2024-01-15T10:30:00Z",
-                    "updated_at": "2024-01-15T10:30:00Z"
+                    "updated_at": "2024-01-15T10:30:00Z",
+                    "learn_count": 5,
+                    "fluency": 80,
+                    "examples": [
+                      {
+                        "id": "1234567890123456790",
+                        "word_id": "1234567890123456789",
+                        "sentence": "Hello, how are you?"
+                      }
+                    ]
                   }
                 }
               }
@@ -390,8 +409,8 @@
       },
       "put": {
         "tags": ["Vocabulary"],
-        "summary": "Update word difficulty",
-        "description": "Update the difficulty level of a word in the user's vocabulary",
+        "summary": "Update word properties",
+        "description": "Update the difficulty level, part of speech, examples, or root word of a word in the user's vocabulary",
         "operationId": "updateWord",
         "security": [
           {
@@ -419,7 +438,9 @@
               },
               "example": {
                 "difficulty": 5,
-                "examples": ["Hello, how are you?", "Say hello to your friend."]
+                "part_of_speech": "interjection",
+                "examples": ["Hello, how are you?", "Say hello to your friend."],
+                "root_word": "hello"
               }
             }
           }
@@ -501,8 +522,19 @@
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
-                "example": {
-                  "error": "Failed to update word"
+                "examples": {
+                  "update_failed": {
+                    "summary": "Failed to update word",
+                    "value": {
+                      "error": "Failed to update user word"
+                    }
+                  },
+                  "examples_failed": {
+                    "summary": "Failed to update examples",
+                    "value": {
+                      "error": "Failed to update word examples"
+                    }
+                  }
                 }
               }
             }
@@ -967,7 +999,7 @@
       "get": {
         "tags": ["Recommendations"],
         "summary": "Get word recommendations",
-        "description": "Get 10 personalized word recommendations based on the user's current vocabulary. The system analyzes user's existing words, gets recommendations from Gemini AI, validates and translates new words, then stores them in the recommendation collection.",
+        "description": "Get personalized word recommendations based on the user's current vocabulary. The system analyzes user's existing words, gets recommendations from Gemini AI, validates and translates new words, then stores them in the recommendation collection.",
         "operationId": "getRecommendations",
         "security": [
           {
@@ -987,7 +1019,9 @@
                     {
                       "id": "1234567890123456789",
                       "word": "beautiful",
-                      "definition": "美麗的",
+                      "translation": "美麗的",
+                      "definition_zh": "美麗的",
+                      "definition_en": "Having beauty; pleasing to the senses or mind",
                       "difficulty": 4,
                       "part_of_speech": "adjective",
                       "root_word": "beautiful",
@@ -1140,10 +1174,20 @@
             "description": "The English word",
             "example": "hello"
           },
-          "definition": {
+          "translation": {
             "type": "string",
-            "description": "Traditional Chinese translation/definition",
+            "description": "Traditional Chinese translation",
             "example": "你好"
+          },
+          "definition_zh": {
+            "type": "string",
+            "description": "Traditional Chinese definition",
+            "example": "你好"
+          },
+          "definition_en": {
+            "type": "string",
+            "description": "English definition",
+            "example": "A greeting used when meeting someone"
           },
           "difficulty": {
             "type": "integer",
@@ -1243,6 +1287,14 @@
         "type": "object",
         "properties": {
           "word": {
+            "$ref": "#/components/schemas/Word"
+          }
+        }
+      },
+      "WordWithUserDataResponse": {
+        "type": "object",
+        "properties": {
+          "word": {
             "$ref": "#/components/schemas/WordWithUserData"
           }
         }
@@ -1325,8 +1377,7 @@
             "items": {
               "$ref": "#/components/schemas/WordWithUserData"
             },
-            "description": "Array of recommended words with user learning data",
-            "maxItems": 10
+            "description": "Array of recommended words with user learning data"
           }
         }
       },

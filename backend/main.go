@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"google-devjam-backend/router/auth"
+	"google-devjam-backend/router/user"
 	"google-devjam-backend/router/vocabulary"
 	mongoUtils "google-devjam-backend/utils/mongodb"
 )
@@ -43,6 +44,7 @@ func main() {
 	e.GET("/health", health)
 	auth.InitRoutes(e)
 	vocabulary.InitRoutes(e)
+	user.InitUserRouter(e)
 
 	// Get port from environment or default to 8080
 	port := os.Getenv("PORT")

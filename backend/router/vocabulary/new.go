@@ -193,7 +193,7 @@ func CreateWord(c echo.Context) error {
 		})
 	}
 
-	if translation.Definition == "" {
+	if translation.DefinitionEn == "" || translation.DefinitionZh == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Could not generate definition for this word",
 		})
@@ -223,14 +223,16 @@ func CreateWord(c echo.Context) error {
 	// Create new word
 	now := time.Now()
 	newWord := model.Word{
-		ID:           wordID,
-		Word:         word,
-		Definition:   translation.Definition,
-		Difficulty:   difficulty,
-		PartOfSpeech: "", // TODO: Add part of speech detection to Gemini
-		RootWord:     "", // TODO: Add root word detection to Gemini
-		CreatedAt:    now,
-		UpdatedAt:    now,
+		ID:            wordID,
+		Word:          word,
+		Translation:   translation.Translation,
+		Definition_zh: translation.DefinitionZh,
+		Definition_en: translation.DefinitionEn,
+		Difficulty:    difficulty,
+		PartOfSpeech:  "", // TODO: Add part of speech detection to Gemini
+		RootWord:      "", // TODO: Add root word detection to Gemini
+		CreatedAt:     now,
+		UpdatedAt:     now,
 	}
 
 	// Insert word into global words collection

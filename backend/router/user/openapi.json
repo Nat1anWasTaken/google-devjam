@@ -1,0 +1,760 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Google DevJam Backend - User Preferences API",
+    "description": "User preferences management endpoints for managing learning level and interests",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/user/preferences": {
+      "get": {
+        "tags": ["User Preferences"],
+        "summary": "Get user preferences",
+        "description": "Retrieve the authenticated user's learning preferences including level and interests",
+        "operationId": "getUserPreferences",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User preferences retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                },
+                "example": {
+                  "preferences": {
+                    "id": "1234567890123456789",
+                    "user_id": "1234567890123456788",
+                    "level": "intermediate",
+                    "interests": ["technology", "science", "travel"],
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User preferences not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User preferences not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Database connection error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["User Preferences"],
+        "summary": "Create user preferences",
+        "description": "Create new learning preferences for the authenticated user",
+        "operationId": "createUserPreferences",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePreferencesRequest"
+              },
+              "example": {
+                "level": "intermediate",
+                "interests": ["technology", "science", "travel"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User preferences created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                },
+                "example": {
+                  "preferences": {
+                    "id": "1234567890123456789",
+                    "user_id": "1234567890123456788",
+                    "level": "intermediate",
+                    "interests": ["technology", "science", "travel"],
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  },
+                  "level_required": {
+                    "summary": "Level is required",
+                    "value": {
+                      "error": "Level is required"
+                    }
+                  },
+                  "invalid_level": {
+                    "summary": "Invalid level value",
+                    "value": {
+                      "error": "Level must be one of: beginner, intermediate, advanced"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User preferences already exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User preferences already exist. Use PUT to update."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to create preferences"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["User Preferences"],
+        "summary": "Update user preferences",
+        "description": "Update existing learning preferences for the authenticated user",
+        "operationId": "updateUserPreferences",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePreferencesRequest"
+              },
+              "example": {
+                "level": "advanced",
+                "interests": ["technology", "science", "travel", "business"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User preferences updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                },
+                "example": {
+                  "preferences": {
+                    "id": "1234567890123456789",
+                    "user_id": "1234567890123456788",
+                    "level": "advanced",
+                    "interests": ["technology", "science", "travel", "business"],
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T11:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  },
+                  "invalid_level": {
+                    "summary": "Invalid level value",
+                    "value": {
+                      "error": "Level must be one of: beginner, intermediate, advanced"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User preferences not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User preferences not found. Use POST to create."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to update preferences"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["User Preferences"],
+        "summary": "Delete user preferences",
+        "description": "Delete all learning preferences for the authenticated user",
+        "operationId": "deleteUserPreferences",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User preferences deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "message": "User preferences deleted successfully"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User preferences not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User preferences not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to delete preferences"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/preferences/interests": {
+      "post": {
+        "tags": ["User Interests"],
+        "summary": "Add interest",
+        "description": "Add a new interest to the user's preferences",
+        "operationId": "addInterest",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddInterestRequest"
+              },
+              "example": {
+                "interest": "music"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interest added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                },
+                "example": {
+                  "preferences": {
+                    "id": "1234567890123456789",
+                    "user_id": "1234567890123456788",
+                    "level": "intermediate",
+                    "interests": ["technology", "science", "travel", "music"],
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T11:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  },
+                  "interest_required": {
+                    "summary": "Interest is required",
+                    "value": {
+                      "error": "Interest is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User preferences not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User preferences not found. Create preferences first."
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Interest already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Interest already exists"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to add interest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/preferences/interests/{interest}": {
+      "delete": {
+        "tags": ["User Interests"],
+        "summary": "Remove interest",
+        "description": "Remove an interest from the user's preferences",
+        "operationId": "removeInterest",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "interest",
+            "in": "path",
+            "description": "Interest to remove",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "music"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interest removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                },
+                "example": {
+                  "preferences": {
+                    "id": "1234567890123456789",
+                    "user_id": "1234567890123456788",
+                    "level": "intermediate",
+                    "interests": ["technology", "science", "travel"],
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T11:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Interest parameter is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Interest or preferences not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "preferences_not_found": {
+                    "summary": "User preferences not found",
+                    "value": {
+                      "error": "User preferences not found"
+                    }
+                  },
+                  "interest_not_found": {
+                    "summary": "Interest not found",
+                    "value": {
+                      "error": "Interest not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to remove interest"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreatePreferencesRequest": {
+        "type": "object",
+        "required": ["level"],
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": ["beginner", "intermediate", "advanced"],
+            "description": "User's learning level",
+            "example": "intermediate"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user's interests",
+            "example": ["technology", "science", "travel"]
+          }
+        }
+      },
+      "UpdatePreferencesRequest": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": ["beginner", "intermediate", "advanced"],
+            "description": "User's learning level",
+            "example": "advanced"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user's interests (replaces all existing interests)",
+            "example": ["technology", "science", "travel", "business"]
+          }
+        }
+      },
+      "AddInterestRequest": {
+        "type": "object",
+        "required": ["interest"],
+        "properties": {
+          "interest": {
+            "type": "string",
+            "description": "Interest to add",
+            "example": "music",
+            "minLength": 1
+          }
+        }
+      },
+      "UserPreferences": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique preferences identifier (Snowflake ID)",
+            "example": "1234567890123456789"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID this preferences belong to",
+            "example": "1234567890123456788"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["beginner", "intermediate", "advanced"],
+            "description": "User's learning level",
+            "example": "intermediate"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user's interests",
+            "example": ["technology", "science", "travel"]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Preferences creation timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          }
+        }
+      },
+      "PreferencesResponse": {
+        "type": "object",
+        "properties": {
+          "preferences": {
+            "$ref": "#/components/schemas/UserPreferences"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Operation completed successfully"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Invalid request format"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from authentication endpoint"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "User Preferences",
+      "description": "User learning preferences management endpoints"
+    },
+    {
+      "name": "User Interests",
+      "description": "User interests management endpoints"
+    }
+  ]
+} 

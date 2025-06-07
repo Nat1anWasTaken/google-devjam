@@ -138,3 +138,10 @@ Respond in this exact JSON format:
 
 	return &result, nil
 }
+
+// GetWordRecommendationsWithPreferences uses Gemini API to get recommendations considering user preferences
+func GetWordRecommendationsWithPreferences(userWords []string, preferences interface{}) (*RecommendationResult, error) {
+	// For now, just call the original function
+	// TODO: Enhance this to use preferences for better recommendations
+	return GetWordRecommendations(userWords)
+}
