@@ -64,15 +64,5 @@ export async function getUser(): Promise<User | null> {
     throw new Error(errorData.message || "Failed to fetch user");
   }
 
-  // return await response.json();
-
-  return {
-    // Mock user data before backend is ready
-    id: "Mock user",
-    display_name: "Mock User",
-    email: "",
-    password: "",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  return (await response.json()) as User;
 }

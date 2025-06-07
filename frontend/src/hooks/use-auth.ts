@@ -16,7 +16,9 @@ type UseAuthReturn = {
   error: any; // Replace with your error type
 };
 
-function useAuth({ redirectIfUnauthenticated = true }: UseAuthOptions = {}) {
+export default function useAuth({
+  redirectIfUnauthenticated = true,
+}: UseAuthOptions = {}): UseAuthReturn {
   const router = useRouter();
   const query = useQuery({
     queryKey: ["currentUser"],
@@ -47,5 +49,3 @@ function useAuth({ redirectIfUnauthenticated = true }: UseAuthOptions = {}) {
     error: query.error,
   };
 }
-
-export default useAuth;

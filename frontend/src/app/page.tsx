@@ -1,10 +1,12 @@
 "use client";
 
 import { BottomNavigation, TabType } from "@/components/bottom-navigation";
+import useAuth from "@/hooks/use-auth";
 import { useState } from "react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("vocabulary");
+  const { user } = useAuth();
 
   return (
     <>
