@@ -15,8 +15,6 @@ export function RootContainer({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  useAuth();
-
   const [isClient, setIsClient] = useState(false);
   const [mobile, setMobile] = useState(false);
   const pathname = usePathname();

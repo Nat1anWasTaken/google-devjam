@@ -5,6 +5,7 @@ import { BookOpen, Newspaper, User, Star } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AddWordDialog } from "@/components/add-word-dialog";
+import useAuth from "@/hooks/use-auth";
 
 export type TabType = "vocabulary" | "news" | "user" | "recommendations";
 
@@ -43,6 +44,8 @@ const tabs: TabConfig[] = [
 ];
 
 export function BottomNavigation() {
+  useAuth();
+
   const pathname = usePathname();
 
   // Split tabs into left and right groups
