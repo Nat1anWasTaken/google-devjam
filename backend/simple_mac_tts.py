@@ -265,6 +265,10 @@ def text_to_speech():
         
         if not text:
             return jsonify({"error": "Text is required"}), 400
+            
+        # Check text length
+        if len(text) > 250:
+            return jsonify({"error": "Text input exceeds maximum length of 250 characters"}), 400
         
         # Auto-select best voice if not specified or invalid
         available_voice_names = [v['name'] for v in available_voices]
@@ -277,8 +281,14 @@ def text_to_speech():
         processed_text = preprocess_text(text)
         logger.info(f"🎭 Generating with voice '{voice}' at {speed}x speed: {processed_text[:50]}...")
         
-        # Generate audio using neural TTS
-        wav_data, sample_rate = tts_manager.synthesize_speech(processed_text, voice, speed)
+        try:
+            # Generate audio using neural TTS
+            wav_data, sample_rate = tts_manager.synthesize_speech(processed_text, voice, speed)
+        except RuntimeError as e:
+            if "shape" in str(e).lower():
+                logger.error(f"❌ Tensor shape mismatch error: {str(e)}")
+                return jsonify({"error": "Internal synthesis error: tensor shape mismatch"}), 500
+            raise  # Re-raise if it's a different RuntimeError
         
         # Enhance audio quality
         enhanced_wav, final_sample_rate = enhance_neural_audio(wav_data, sample_rate)
