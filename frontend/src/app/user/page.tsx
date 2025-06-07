@@ -237,6 +237,21 @@ export default function UserPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Install App Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>安裝應用程式</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground">
+                將此應用程式安裝到您的設備上，享受更好的體驗
+              </p>
+              <InstallButton />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -290,6 +305,19 @@ function UserPageSkeleton() {
               <Skeleton className="h-8 w-24" />
               <Skeleton className="h-8 w-32" />
               <Skeleton className="h-8 w-28" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Install App Skeleton */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center space-y-4">
+              <Skeleton className="h-4 w-64 mx-auto" />
+              <Skeleton className="h-10 w-32 mx-auto" />
             </div>
           </CardContent>
         </Card>
