@@ -11,7 +11,7 @@ import useAuth from "@/hooks/use-auth";
 import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
 import { cn, getDifficultyColor } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Mail, User, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, LoaderCircle, Mail, User, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -152,7 +152,7 @@ export default function UserPage() {
                 {/* Loading Overlay */}
                 {updateLevelMutation.isPending && (
                   <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-                    <DifficultyLoadingAnimation />
+                    <LoaderCircle className="size-8 animate-spin text-muted-foreground" />
                   </div>
                 )}
 
