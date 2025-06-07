@@ -1,23 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { getSingleNews } from "@/lib/api/news";
-import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { DifficultyBadge } from "@/components/difficulty-badge";
+import { QuizComponent } from "@/components/quiz-component";
+import { QuizComponentSkeleton } from "@/components/quiz-component-skeleton";
+import TtsAudioPlayer from "@/components/tts-audio-player";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, Calendar, ExternalLink, PartyPopper, Swords, Tag, VolumeOff } from "lucide-react";
-import Markdown from "react-markdown";
-import { mapLevelToDifficulty } from "@/lib/utils";
-import { DifficultyBadge } from "@/components/difficulty-badge";
-import { QuizComponentSkeleton } from "@/components/quiz-component-skeleton";
-import { QuizComponent } from "@/components/quiz-component";
 import { useNewsVocabulary } from "@/hooks/use-news-vocabulary";
-import AudioPlayer from "@/components/audio-player";
-
-const s3BaseUrl = process.env.NEXT_PUBLIC_BUCKET_BASE;
+import { getSingleNews } from "@/lib/api/news";
+import { mapLevelToDifficulty } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeftIcon, Calendar, ExternalLink, PartyPopper, Swords, Tag } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import Markdown from "react-markdown";
 
 export default function NewsPage() {
   const params = useParams();
@@ -130,15 +128,8 @@ export default function NewsPage() {
           <DifficultyBadge difficulty={mapLevelToDifficulty(news.level)} />
         </div>
 
-        {/* Audio Player */}
-        {news.audio_url ? (
-          <AudioPlayer audioUrl={s3BaseUrl + news.audio_url} newsId={news.id} />
-        ) : (
-          <div className="flex flex-row justify-start items-center gap-2 text-sm text-muted-foreground">
-            <VolumeOff className="h-4 w-4" />
-            此新聞沒有音訊檔案可供播放。
-          </div>
-        )}
+        {/* TTS Audio Player */}
+        <TtsAudioPlayer text={news.content} newsId={news.id} />
 
         {/* Article content */}
         <div className="prose prose-lg max-w-none">

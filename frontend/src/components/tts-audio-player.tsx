@@ -1,0 +1,208 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { useTextToSpeech } from "@/hooks/use-text-to-speech";
+import { cn, formatTime } from "@/lib/utils";
+import { AlertCircle, Pause, Play, RotateCcw, Settings, Volume2 } from "lucide-react";
+import React, { useState } from "react";
+import { toast } from "sonner";
+
+interface TtsAudioPlayerProps {
+  text: string;
+  newsId: string;
+  className?: string;
+}
+
+interface WordHighlighterProps {
+  words: string[];
+  currentWordIndex: number;
+  onWordClick: (wordIndex: number) => void;
+  isPlaying: boolean;
+}
+
+const WordHighlighter: React.FC<WordHighlighterProps> = ({ words, currentWordIndex, onWordClick, isPlaying }) => {
+  return (
+    <div className="mt-4 p-4 bg-muted/30 rounded-lg max-h-32 overflow-y-auto">
+      <div className="text-sm leading-relaxed select-none">
+        {words.map((word, index) => (
+          <React.Fragment key={index}>
+            <span
+              className={cn(
+                "cursor-pointer hover:bg-muted px-0.5 py-0.5 rounded transition-colors inline-block",
+                index === currentWordIndex && isPlaying ? "bg-primary text-primary-foreground font-medium" : "hover:bg-muted"
+              )}
+              onClick={() => onWordClick(index)}
+            >
+              {word}
+            </span>
+            {index < words.length - 1 && <span className="inline-block w-1"> </span>}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export const TtsAudioPlayer: React.FC<TtsAudioPlayerProps> = ({ text, newsId: _newsId, className }) => {
+  const [showControls, setShowControls] = useState(false);
+  const [speechRate, setSpeechRate] = useState(1);
+
+  const { state, controls, words, availableVoices, selectedVoiceIndex } = useTextToSpeech(text, {
+    rate: speechRate
+  });
+
+  const { isPlaying, isPaused, currentWordIndex, progress, duration, isSupported, error } = state;
+
+  // Handle play/pause
+  const handlePlayPause = () => {
+    try {
+      if (isPlaying) {
+        controls.pause();
+      } else {
+        controls.play();
+      }
+    } catch (err) {
+      toast.error(`播放失敗: ${err instanceof Error ? err.message : "未知錯誤"}`);
+    }
+  };
+
+  // Handle progress bar change
+  const handleProgressChange = (value: number[]) => {
+    const percentage = value[0];
+    const wordIndex = Math.floor((percentage / 100) * words.length);
+    controls.seekToWord(wordIndex);
+  };
+
+  // Handle word click
+  const handleWordClick = (wordIndex: number) => {
+    controls.seekToWord(wordIndex);
+  };
+
+  // Handle rate change
+  const handleRateChange = (value: number[]) => {
+    const newRate = value[0];
+    setSpeechRate(newRate);
+    controls.setRate(newRate);
+  };
+
+  // Handle voice change
+  const handleVoiceChange = (value: string) => {
+    const voiceIndex = parseInt(value);
+    controls.setVoice(voiceIndex);
+  };
+
+  // Calculate current time based on progress
+  const currentTime = (progress / 100) * duration;
+
+  // Show error if not supported
+  if (!isSupported) {
+    return (
+      <Card className={cn("w-full", className)}>
+        <CardContent>
+          <div className="flex items-center space-x-4 text-destructive">
+            <AlertCircle className="h-5 w-5" />
+            <span className="text-sm">您的瀏覽器不支援語音合成功能</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className={cn("w-full", className)}>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Main Controls */}
+          <div className="flex items-center space-x-4">
+            {/* Play/Pause Button */}
+            <div className="flex-shrink-0">
+              {error ? (
+                <Button variant="outline" size="icon" onClick={() => window.location.reload()} className="h-10 w-10">
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button variant="default" size="icon" onClick={handlePlayPause} disabled={!text || words.length === 0} className="h-10 w-10 text-foreground">
+                  {isPlaying && !isPaused ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+                </Button>
+              )}
+            </div>
+
+            {/* Progress Section */}
+            <div className="flex-1 space-y-2">
+              {/* Progress Bar */}
+              <div className="relative">
+                <Slider value={[progress]} onValueChange={handleProgressChange} disabled={!text || words.length === 0 || !!error} max={100} step={1} className="w-full" />
+              </div>
+
+              {/* Time Display */}
+              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <span className="w-12 text-left tabular-nums">{formatTime(currentTime)}</span>
+                {error ? (
+                  <div className="flex items-center space-x-1 text-destructive">
+                    <AlertCircle className="h-3 w-3" />
+                    <span className="text-xs">{error}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <span className="w-12 text-right tabular-nums">{formatTime(duration)}</span>
+                    <span className="text-xs whitespace-nowrap">
+                      ({Math.min(currentWordIndex + 1, words.length)}/{words.length} words)
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Settings Button */}
+            <div className="flex-shrink-0 flex items-center space-x-2">
+              <Button variant="ghost" size="icon" onClick={() => setShowControls(!showControls)} className="h-8 w-8">
+                <Settings className="h-4 w-4" />
+              </Button>
+              <Volume2 className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+
+          {/* Advanced Controls */}
+          {showControls && (
+            <div className="space-y-3 pt-2 border-t">
+              {/* Speed Control */}
+              <div className="flex items-center space-x-3">
+                <Label className="text-sm font-medium min-w-0">速度</Label>
+                <Slider value={[speechRate]} onValueChange={handleRateChange} min={0.5} max={2} step={0.1} className="flex-1" />
+                <span className="text-sm text-muted-foreground min-w-0">{speechRate.toFixed(1)}x</span>
+              </div>
+
+              {/* Voice Selection */}
+              {availableVoices.length > 0 && (
+                <div className="flex items-center space-x-3">
+                  <Label className="text-sm font-medium min-w-0">語音</Label>
+                  <Select value={selectedVoiceIndex.toString()} onValueChange={handleVoiceChange}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="選擇語音" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableVoices.map((voice, index) => (
+                        <SelectItem key={index} value={index.toString()}>
+                          {voice.name} ({voice.lang})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Word Highlighter */}
+          {words.length > 0 && <WordHighlighter words={words} currentWordIndex={currentWordIndex} onWordClick={handleWordClick} isPlaying={isPlaying} />}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default TtsAudioPlayer;
