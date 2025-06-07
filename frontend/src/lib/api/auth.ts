@@ -2,9 +2,8 @@
 
 import { LoginData } from "@/components/login-form";
 import { RegisterData } from "@/components/register-form";
-import { createAuthHeaders } from "./utils";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
+export const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
 
 interface ApiError extends Error {
   fullResponse?: unknown;
@@ -92,22 +91,4 @@ export async function loginUser(userData: LoginData): Promise<LoginResponse> {
 
   const data = await response.json();
   return data;
-}
-
-export async function getUser(): Promise<User | null> {
-  const response = await fetch(`${baseUrl}/auth/me`, {
-    credentials: "include",
-    method: "GET",
-    headers: createAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      return null; // User not authenticated
-    }
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch user");
-  }
-
-  return (await response.json()) as User;
 }

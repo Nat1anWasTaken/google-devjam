@@ -1,5 +1,4 @@
 "use client";
-
 import { createAuthHeaders } from "./utils";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
@@ -32,8 +31,8 @@ type SuccessResponse = {
   message: string;
 };
 
-type ErrorResponse = {
-  error: string;
+export type GetUserResponse = {
+  user: User;
 };
 
 export async function getUserPreferences(): Promise<PreferencesResponse> {
@@ -173,4 +172,22 @@ export async function removeInterest(
 
   const responseData = await response.json();
   return responseData;
+}
+
+export async function getUser(): Promise<User | null> {
+  const response = await fetch(`${baseUrl}/user/me`, {
+    credentials: "include",
+    method: "GET",
+    headers: createAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      return null; // User not authenticated
+    }
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch user");
+  }
+
+  return ((await response.json()) as GetUserResponse).user as User;
 }

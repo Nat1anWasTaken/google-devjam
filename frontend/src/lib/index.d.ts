@@ -36,7 +36,7 @@ type UserPreferences = {
   id: string;
   user_id: string;
   level: number; // 1-10
-  interests: string[];
+  interests: string[]; // Array of interest strings
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 };

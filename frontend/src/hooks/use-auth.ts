@@ -1,6 +1,7 @@
 "use client";
 
-import { getUser, removeStoredToken } from "@/lib/api/auth";
+import { removeStoredToken } from "@/lib/api/auth";
+import { getUser } from "@/lib/api/user";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -20,6 +21,7 @@ export default function useAuth({
   redirectIfUnauthenticated = true,
 }: UseAuthOptions = {}): UseAuthReturn {
   const router = useRouter();
+
   const query = useQuery({
     queryKey: ["currentUser"],
     queryFn: getUser,

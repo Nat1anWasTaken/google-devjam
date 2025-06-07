@@ -31,3 +31,48 @@ export const getDifficultyColor = (difficulty: number) => {
   if (difficulty <= 8) return "bg-orange-500";
   return "bg-red-500";
 };
+
+// Generate Gravatar URL from email (async)
+export const getGravatarUrl = async (
+  email: string,
+  size: number = 80
+): Promise<string> => {
+  if (typeof window === "undefined") {
+    // Server-side fallback
+    return `https://www.gravatar.com/avatar/default?s=${size}&d=mp`;
+  }
+
+  try {
+    // Create MD5 hash of email
+    const encoder = new TextEncoder();
+    const data = encoder.encode(email.toLowerCase().trim());
+
+    // Simple MD5 implementation for client-side
+    const hashBuffer = await crypto.subtle.digest("MD5", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return `https://www.gravatar.com/avatar/${hashHex}?s=${size}&d=mp`;
+  } catch {
+    // Fallback if crypto is not available
+    return `https://www.gravatar.com/avatar/default?s=${size}&d=mp`;
+  }
+};
+
+// Synchronous fallback for Gravatar (using a simple hash)
+export const getGravatarUrlSync = (
+  email: string,
+  size: number = 80
+): string => {
+  // Simple hash function for fallback
+  let hash = 0;
+  const str = email.toLowerCase().trim();
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  const hashHex = Math.abs(hash).toString(16);
+  return `https://www.gravatar.com/avatar/${hashHex}?s=${size}&d=mp`;
+};
