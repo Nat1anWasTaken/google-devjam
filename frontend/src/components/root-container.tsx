@@ -19,9 +19,12 @@ export function RootContainer({
   const pathname = usePathname();
 
   // Check if we're on a page that should show bottom navigation
-  const shouldShowBottomNav = ["/vocabulary", "/news", "/user"].includes(
-    pathname
-  );
+  const shouldShowBottomNav = [
+    "/vocabulary",
+    "/recommendations",
+    "/news",
+    "/user",
+  ].includes(pathname);
 
   useEffect(() => {
     setIsClient(true);

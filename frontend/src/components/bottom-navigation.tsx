@@ -1,11 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { BookOpen, Newspaper, User } from "lucide-react";
+import { BookOpen, Newspaper, User, Star } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export type TabType = "vocabulary" | "news" | "user";
+export type TabType = "vocabulary" | "news" | "user" | "recommendations";
 
 interface TabConfig {
   id: TabType;
@@ -20,6 +20,12 @@ const tabs: TabConfig[] = [
     label: "單字庫",
     icon: BookOpen,
     href: "/vocabulary",
+  },
+  {
+    id: "recommendations",
+    label: "推薦",
+    icon: Star,
+    href: "/recommendations",
   },
   {
     id: "news",
