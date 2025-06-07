@@ -1,3 +1,5 @@
+"use client";
+
 import { LoginData } from "@/components/login-form";
 import { RegisterData } from "@/components/register-form";
 
