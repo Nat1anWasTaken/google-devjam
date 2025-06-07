@@ -237,17 +237,6 @@ export default function UserPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Install App Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>安裝應用程式</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-muted-foreground">將 LexLoop 安裝到您的裝置上，享受更好的使用體驗。</p>
-            <InstallButton size="lg" className="w-full" />
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

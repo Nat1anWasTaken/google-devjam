@@ -22,6 +22,16 @@ export function InstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
+    // Check if prompt was recently dismissed first
+    const dismissed = localStorage.getItem("install-prompt-dismissed");
+    let wasRecentlyDismissed = false;
+
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed);
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+      wasRecentlyDismissed = Date.now() - dismissedTime < twentyFourHours;
+    }
+
     // Check if it's iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window);
     setIsIOS(isIOSDevice);
@@ -35,13 +45,17 @@ export function InstallPrompt() {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
-      setShowPrompt(true);
+      
+      // Only show prompt if not recently dismissed
+      if (!wasRecentlyDismissed) {
+        setShowPrompt(true);
+      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // For iOS devices, show prompt if not in standalone mode
-    if (isIOSDevice && !isInStandalone) {
+    // For iOS devices, show prompt if not in standalone mode and not recently dismissed
+    if (isIOSDevice && !isInStandalone && !wasRecentlyDismissed) {
       setShowPrompt(true);
     }
 
@@ -67,19 +81,6 @@ export function InstallPrompt() {
     // Hide for 24 hours
     localStorage.setItem("install-prompt-dismissed", Date.now().toString());
   };
-
-  // Check if prompt was recently dismissed
-  useEffect(() => {
-    const dismissed = localStorage.getItem("install-prompt-dismissed");
-    if (dismissed) {
-      const dismissedTime = parseInt(dismissed);
-      const twentyFourHours = 24 * 60 * 60 * 1000;
-      if (Date.now() - dismissedTime < twentyFourHours) {
-        setShowPrompt(false);
-        return;
-      }
-    }
-  }, []);
 
   // Don't show if already installed
   if (isStandalone || !showPrompt) {
