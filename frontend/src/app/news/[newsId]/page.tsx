@@ -170,6 +170,9 @@ export default function NewsPage() {
         <div className="flex items-center gap-2 text-sm font-semibold">
           <Swords className="h-4 w-4" />
           <span>牛刀小試</span>
+          <span className="text-muted-foreground">
+            （右滑知道、左滑不知道）
+          </span>
         </div>
         {wordsQuery.isLoading ? (
           <QuizComponentSkeleton />

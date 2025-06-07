@@ -206,7 +206,7 @@ export function QuizComponent({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp} // 處理鼠標離開的情況
       >
-        <CardContent className="p-6">
+        <CardContent>
           <div className="flex flex-col justify-center items-start gap-4">
             <div className="flex flex-row justify-center items-end gap-2">
               <h2 className="text-lg font-semibold">{word.word}</h2>
@@ -215,11 +215,6 @@ export function QuizComponent({
             <p className="text-base text-muted-foreground">
               你知道這個字是什麼意思了嗎？
             </p>
-            <div className="text-center w-full">
-              <p className="text-sm text-muted-foreground">
-                左滑：不知道 | 右滑：知道
-              </p>
-            </div>
           </div>
         </CardContent>
       </Card>
