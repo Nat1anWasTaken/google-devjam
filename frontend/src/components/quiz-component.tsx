@@ -20,6 +20,7 @@ export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps
   const [animationDirection, setAnimationDirection] = useState<"left" | "right" | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
+  const startY = useRef(0);
   const currentX = useRef(0);
 
   const learnWordMutation = useMutation({
@@ -64,6 +65,7 @@ export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isAnimating) return;
     startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
     setIsDragging(true);
   };
 
@@ -71,8 +73,22 @@ export function QuizComponent({ word, onComplete, onRemove }: QuizComponentProps
     if (!isDragging || isAnimating) return;
 
     currentX.current = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
     const diffX = currentX.current - startX.current;
-    setDragX(diffX);
+    const diffY = currentY - startY.current;
+    
+    // Determine if this is a horizontal or vertical gesture
+    const isHorizontalGesture = Math.abs(diffX) > Math.abs(diffY);
+    
+    // Prevent vertical scrolling when horizontal swipe is detected
+    if (isHorizontalGesture && Math.abs(diffX) > 10) {
+      e.preventDefault();
+    }
+    
+    // Only update dragX for horizontal gestures
+    if (isHorizontalGesture) {
+      setDragX(diffX);
+    }
   };
 
   const handleTouchEnd = () => {
