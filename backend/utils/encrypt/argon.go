@@ -21,11 +21,11 @@ type ArgonParams struct {
 // GetArgonParams returns secure default parameters for Argon2
 func GetArgonParams() *ArgonParams {
 	return &ArgonParams{
-		Memory:      64 * 1024, // 64 MB
-		Iterations:  3,         // 3 iterations
-		Parallelism: 2,         // 2 threads
-		SaltLength:  16,        // 16 bytes salt
-		KeyLength:   32,        // 32 bytes key
+		Memory:      512 * 1024, // 512 MB
+		Iterations:  15,         // 15 iterations
+		Parallelism: 8,          // 8 threads
+		SaltLength:  32,         // 32 bytes salt
+		KeyLength:   64,         // 64 bytes key
 	}
 }
 
@@ -106,4 +106,4 @@ func decodeHash(encodedHash string) (*ArgonParams, []byte, []byte, error) {
 	params.KeyLength = uint32(len(hash))
 
 	return params, salt, hash, nil
-} 
+}

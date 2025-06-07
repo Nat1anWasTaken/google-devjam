@@ -14,7 +14,7 @@ import (
 )
 
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
+	Email    string `json:"email" validate:"required,email"` // Only email for login
 	Password string `json:"password" validate:"required"`
 }
 
@@ -42,11 +42,12 @@ func Login(c echo.Context) error {
 	}
 
 	var user model.User
+	// Find user by email only
 	err := collection.FindOne(context.Background(), bson.M{"email": req.Email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.JSON(http.StatusUnauthorized, map[string]string{
-				"error": "Invalid email or password",
+				"error": "Invalid login credentials",
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -63,7 +64,7 @@ func Login(c echo.Context) error {
 	}
 	if !isValid {
 		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "Invalid email or password",
+			"error": "Invalid login credentials",
 		})
 	}
 
@@ -75,22 +76,11 @@ func Login(c echo.Context) error {
 		})
 	}
 
-	// Set JWT token as HTTP-only cookie
-	cookie := &http.Cookie{
-		Name:     "auth_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   24 * 60 * 60, // 24 hours
-	}
-	c.SetCookie(cookie)
-
 	// Remove password from response
 	user.Password = ""
 
-	return c.JSON(http.StatusOK, AuthResponse{
-		User: user,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"user":  user,
+		"token": token,
 	})
 }

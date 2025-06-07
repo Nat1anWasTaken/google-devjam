@@ -1,0 +1,503 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Google DevJam Backend - Authentication API",
+    "description": "Authentication endpoints for user registration, login, and profile management",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user",
+        "description": "Create a new user account with display name, email, and password",
+        "operationId": "registerUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              },
+              "example": {
+                "display_name": "John Doe",
+                "email": "john.doe@example.com",
+                "password": "securepassword123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "example": {
+                  "user": {
+                    "id": "1234567890123456789",
+                    "display_name": "John Doe",
+                    "email": "john.doe@example.com",
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z"
+                  },
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request format or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  },
+                  "missing_fields": {
+                    "summary": "Missing required fields",
+                    "value": {
+                      "error": "Display name, email and password are required"
+                    }
+                  },
+                  "display_name_length": {
+                    "summary": "Display name length validation",
+                    "value": {
+                      "error": "Display name must be between 1 and 50 characters"
+                    }
+                  },
+                  "password_length": {
+                    "summary": "Password length validation",
+                    "value": {
+                      "error": "Password must be at least 6 characters long"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User with this email already exists"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "database_error": {
+                    "summary": "Database connection error",
+                    "value": {
+                      "error": "Database connection error"
+                    }
+                  },
+                  "id_generation_error": {
+                    "summary": "ID generation failed",
+                    "value": {
+                      "error": "Failed to generate user ID"
+                    }
+                  },
+                  "password_hash_error": {
+                    "summary": "Password hashing failed",
+                    "value": {
+                      "error": "Failed to hash password"
+                    }
+                  },
+                  "user_creation_error": {
+                    "summary": "User creation failed",
+                    "value": {
+                      "error": "Failed to create user"
+                    }
+                  },
+                  "token_generation_error": {
+                    "summary": "Token generation failed",
+                    "value": {
+                      "error": "Failed to generate authentication token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login user",
+        "description": "Authenticate user with email and password",
+        "operationId": "loginUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "example": {
+                "email": "john.doe@example.com",
+                "password": "securepassword123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "example": {
+                  "user": {
+                    "id": "1234567890123456789",
+                    "display_name": "John Doe",
+                    "email": "john.doe@example.com",
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z"
+                  },
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request format or missing fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "invalid_format": {
+                    "summary": "Invalid request format",
+                    "value": {
+                      "error": "Invalid request format"
+                    }
+                  },
+                  "missing_fields": {
+                    "summary": "Missing required fields",
+                    "value": {
+                      "error": "Email and password are required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid login credentials"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "database_error": {
+                    "summary": "Database connection error",
+                    "value": {
+                      "error": "Database connection error"
+                    }
+                  },
+                  "password_verification_error": {
+                    "summary": "Password verification failed",
+                    "value": {
+                      "error": "Password verification error"
+                    }
+                  },
+                  "token_generation_error": {
+                    "summary": "Token generation failed",
+                    "value": {
+                      "error": "Failed to generate authentication token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Get current user profile",
+        "description": "Retrieve the authenticated user's profile information",
+        "operationId": "getCurrentUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                },
+                "example": {
+                  "user": {
+                    "id": "1234567890123456789",
+                    "display_name": "John Doe",
+                    "email": "john.doe@example.com",
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "missing_header": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": "Authorization header is required"
+                    }
+                  },
+                  "invalid_bearer": {
+                    "summary": "Invalid Bearer format",
+                    "value": {
+                      "error": "Authorization header must start with 'Bearer '"
+                    }
+                  },
+                  "missing_token": {
+                    "summary": "Missing Bearer token",
+                    "value": {
+                      "error": "Bearer token is required"
+                    }
+                  },
+                  "invalid_token": {
+                    "summary": "Invalid or expired token",
+                    "value": {
+                      "error": "Invalid or expired token"
+                    }
+                  },
+                  "user_not_authenticated": {
+                    "summary": "User not authenticated",
+                    "value": {
+                      "error": "User not authenticated"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "database_error": {
+                    "summary": "Database connection error",
+                    "value": {
+                      "error": "Database connection error"
+                    }
+                  },
+                  "database_query_error": {
+                    "summary": "Database query error",
+                    "value": {
+                      "error": "Database error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["display_name", "email", "password"],
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "User's display name",
+            "example": "John Doe"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "description": "User's password (minimum 6 characters)",
+            "example": "securepassword123"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "securepassword123"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique user identifier (Snowflake ID)",
+            "example": "1234567890123456789"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User's display name",
+            "example": "John Doe"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address",
+            "example": "john.doe@example.com"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Account creation timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "token": {
+            "type": "string",
+            "description": "JWT authentication token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Invalid request format"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from login endpoint"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User authentication and profile management endpoints"
+    }
+  ]
+} 

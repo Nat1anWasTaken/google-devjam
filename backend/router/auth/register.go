@@ -15,8 +15,9 @@ import (
 )
 
 type RegisterRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	DisplayName string `json:"display_name" validate:"required,min=1,max=50"`
+	Email       string `json:"email" validate:"required,email"`
+	Password    string `json:"password" validate:"required,min=6"`
 }
 
 type AuthResponse struct {
@@ -32,9 +33,15 @@ func Register(c echo.Context) error {
 	}
 
 	// Validate request
-	if req.Email == "" || req.Password == "" {
+	if req.DisplayName == "" || req.Email == "" || req.Password == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Email and password are required",
+			"error": "Display name, email and password are required",
+		})
+	}
+
+	if len(req.DisplayName) < 1 || len(req.DisplayName) > 50 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Display name must be between 1 and 50 characters",
 		})
 	}
 
@@ -52,6 +59,7 @@ func Register(c echo.Context) error {
 		})
 	}
 
+	// Check if email already exists (only email needs to be unique)
 	var existingUser model.User
 	err := collection.FindOne(context.Background(), bson.M{"email": req.Email}).Decode(&existingUser)
 	if err == nil {
@@ -83,11 +91,12 @@ func Register(c echo.Context) error {
 	// Create new user
 	now := time.Now()
 	user := model.User{
-		ID:        userID,
-		Email:     req.Email,
-		Password:  hashedPassword,
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:          userID,
+		DisplayName: req.DisplayName,
+		Email:       req.Email,
+		Password:    hashedPassword,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}
 
 	// Insert user into database
@@ -106,22 +115,11 @@ func Register(c echo.Context) error {
 		})
 	}
 
-	// Set JWT token as HTTP-only cookie
-	cookie := &http.Cookie{
-		Name:     "auth_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   24 * 60 * 60, // 24 hours
-	}
-	c.SetCookie(cookie)
-
 	// Remove password from response
 	user.Password = ""
 
-	return c.JSON(http.StatusCreated, AuthResponse{
-		User: user,
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"user":  user,
+		"token": token,
 	})
 }

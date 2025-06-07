@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"google-devjam-backend/router/auth"
+	"google-devjam-backend/router/vocabulary"
 	mongoUtils "google-devjam-backend/utils/mongodb"
 )
 
@@ -30,12 +31,18 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
+	}))
 
 	// Routes
 	e.GET("/", hello)
 	e.GET("/health", health)
 	auth.InitRoutes(e)
+	vocabulary.InitRoutes(e)
 
 	// Get port from environment or default to 8080
 	port := os.Getenv("PORT")

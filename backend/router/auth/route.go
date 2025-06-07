@@ -7,7 +7,9 @@ import (
 )
 
 func InitRoutes(e *echo.Echo) {
-	e.POST("/auth/register", Register)
-	e.POST("/auth/login", Login)
-	e.POST("/auth/logout", Logout, middleware.JWTMiddleware())
+	auth := e.Group("/auth")
+
+	auth.POST("/register", Register)
+	auth.POST("/login", Login)
+	auth.GET("/me", Me, middleware.JWTMiddleware())
 }
