@@ -21,7 +21,7 @@ export default function LoginPage() {
 
       try {
         // Extract user data from login response (LoginResponse extends User)
-        const { token, ...userData } = data;
+        const { token: _token, ...userData } = data;
 
         // Pre-populate the query cache with user data
         if (userData && Object.keys(userData).length > 0) {

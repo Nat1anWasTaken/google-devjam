@@ -45,7 +45,7 @@ export default function useAuth({ redirectIfUnauthenticated = true }: UseAuthOpt
     queryKey: ["currentUser"],
     queryFn: getUser,
     enabled: isClient && !!token, // Only run query if we're on client and have a token
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: Error & { status?: number }) => {
       // Don't retry on 401 errors (unauthorized)
       if (error?.message?.includes("401") || error?.status === 401) {
         return false;
@@ -73,7 +73,7 @@ export default function useAuth({ redirectIfUnauthenticated = true }: UseAuthOpt
 
     // Case 2: Have token but query failed with auth error
     if (redirectIfUnauthenticated && token && query.isError) {
-      const error = query.error as any;
+      const error = query.error as Error & { status?: number };
       if (error?.message?.includes("401") || error?.status === 401) {
         console.log("useAuth: Token invalid/expired, clearing and redirecting to login");
         logAuthDebugInfo("Before clearing token");

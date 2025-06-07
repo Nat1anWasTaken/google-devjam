@@ -21,7 +21,7 @@ export default function RegisterPage() {
 
       try {
         // Extract user data from register response (RegisterResponse extends User)
-        const { token, ...userData } = data;
+        const { token: _token, ...userData } = data;
 
         // Pre-populate the query cache with user data
         if (userData && Object.keys(userData).length > 0) {
