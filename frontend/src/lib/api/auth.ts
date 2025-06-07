@@ -56,13 +56,13 @@ export async function getUser(): Promise<User | null> {
     },
   });
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      return null; // User not authenticated
-    }
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch user");
-  }
+  // if (!response.ok) {
+  //   if (response.status === 401) {
+  //     return null; // User not authenticated
+  //   }
+  //   const errorData = await response.json();
+  //   throw new Error(errorData.message || "Failed to fetch user");
+  // }
 
   // return (await response.json()) as User;
 

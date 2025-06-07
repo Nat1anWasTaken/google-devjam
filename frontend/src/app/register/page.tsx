@@ -2,16 +2,18 @@
 
 import { RegisterData, RegisterForm } from "@/components/register-form";
 import { registerUser } from "@/lib/api/auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: registerUser,
     onSuccess: (data) => {
       console.log("Registration successful:", data);
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       router.push("/");
     },
     onError: (error) => {
