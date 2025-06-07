@@ -7,16 +7,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddInterestsDialog } from "@/components/add-interests-dialog";
 import { InstallButton } from "@/components/install-button";
 import useAuth from "@/hooks/use-auth";
+import { logout } from "@/lib/api/auth";
 import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
 import { cn, getDifficultyColor } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, LoaderCircle, Mail, User, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, LoaderCircle, LogOut, Mail, User, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function UserPage() {
   const { user, isLoading: userLoading } = useAuth();
   const [optimisticLevel, setOptimisticLevel] = useState<number | null>(null);
+  const router = useRouter();
 
   const queryClient = useQueryClient();
 
@@ -83,6 +86,14 @@ export default function UserPage() {
     }
   };
 
+  const handleLogout = () => {
+    // Clear token and invalidate all queries
+    logout();
+    queryClient.clear();
+    // Redirect to login page
+    router.push("/login");
+  };
+
   if (userLoading) {
     return <UserPageSkeleton />;
   }
@@ -130,6 +141,12 @@ export default function UserPage() {
                   {user.email}
                 </p>
               </div>
+
+              {/* Logout Button */}
+              <Button variant="destructive" onClick={handleLogout} className="mt-4 flex items-center gap-2">
+                <LogOut className="size-4" />
+                登出
+              </Button>
             </div>
           </CardContent>
         </Card>
