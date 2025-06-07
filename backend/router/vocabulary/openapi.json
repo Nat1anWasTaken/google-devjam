@@ -19,7 +19,7 @@
       "post": {
         "tags": ["Vocabulary"],
         "summary": "Create a new word",
-        "description": "Add a new word to the user's vocabulary. The word will be validated and translated using Gemini AI, then added to both global words collection and user's personal vocabulary.",
+        "description": "Add a new word to the user's vocabulary. The word will be validated, translated, and example sentences will be generated using Gemini AI, then added to both global words collection and user's personal vocabulary.",
         "operationId": "createWord",
         "security": [
           {
@@ -237,7 +237,11 @@
                       "created_at": "2024-01-15T10:30:00Z",
                       "updated_at": "2024-01-15T10:30:00Z",
                       "learn_count": 5,
-                      "fluency": 80
+                      "fluency": 80,
+                      "part_of_speech": "interjection",
+                      "example": ["Hello, how are you?", "Say hello to your friend.", "Hello there!"],
+                      "root_word": "",
+                      "origin": ""
                     }
                   ],
                   "total": 1,

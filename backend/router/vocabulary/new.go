@@ -91,12 +91,25 @@ func CreateWord(c echo.Context) error {
 			})
 		}
 
+		// Generate examples for existing word using Gemini
+		translation, err := gemini.TranslateWord(word)
+		if err != nil {
+			// If Gemini fails, continue without examples
+			translation = &gemini.TranslationResult{Examples: []string{}}
+		}
+
 		// Add existing word to user's vocabulary
 		userWordID, err := encrypt.GenerateSnowflakeID()
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "Failed to generate ID",
 			})
+		}
+
+		// Use examples from Gemini if available
+		examples := []string{}
+		if len(translation.Examples) > 0 {
+			examples = translation.Examples
 		}
 
 		now := time.Now()
@@ -107,7 +120,7 @@ func CreateWord(c echo.Context) error {
 			LearnCount:   0,
 			Fluency:      0,
 			PartOfSpeech: "",
-			Example:      []string{},
+			Example:      examples,
 			RootWord:     "",
 			Origin:       "",
 			CreatedAt:    now,
@@ -198,6 +211,12 @@ func CreateWord(c echo.Context) error {
 		})
 	}
 
+	// Use examples from Gemini if available
+	examples := []string{}
+	if len(translation.Examples) > 0 {
+		examples = translation.Examples
+	}
+
 	userWord := model.UserWord{
 		ID:           userWordID,
 		UserID:       userID,
@@ -205,7 +224,7 @@ func CreateWord(c echo.Context) error {
 		LearnCount:   0,
 		Fluency:      0,
 		PartOfSpeech: "",
-		Example:      []string{},
+		Example:      examples,
 		RootWord:     "",
 		Origin:       "",
 		CreatedAt:    now,

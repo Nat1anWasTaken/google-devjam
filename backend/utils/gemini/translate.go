@@ -31,10 +31,11 @@ type Candidate struct {
 }
 
 type TranslationResult struct {
-	Definition string `json:"definition"`
-	IsValid    bool   `json:"is_valid"`
-	Difficulty int    `json:"difficulty"`
-	Reason     string `json:"reason,omitempty"`
+	Definition string   `json:"definition"`
+	IsValid    bool     `json:"is_valid"`
+	Difficulty int      `json:"difficulty"`
+	Examples   []string `json:"examples,omitempty"`
+	Reason     string   `json:"reason,omitempty"`
 }
 
 // TranslateWord uses Gemini API to translate and validate a word
@@ -71,10 +72,12 @@ EXAMPLES OF WORDS TO ACCEPT:
 - Base verbs: "run", "eat", "go", "think"
 - Base adjectives: "big", "small", "happy", "difficult"
 
-If the word IS valid, provide Chinese translation using traditional Chinese characters and assign a difficulty level from 1-10 based on word complexity and frequency:
+If the word IS valid, provide Chinese translation using traditional Chinese characters, assign a difficulty level from 1-10 based on word complexity and frequency, and generate 2-3 simple example sentences:
    - 1-3: Very common, basic words (cat, run, big)
    - 4-6: Intermediate words (beautiful, important, develop)
    - 7-10: Advanced, complex, or rare words (sophisticated, phenomenon, ubiquitous)
+
+For examples, create simple, clear sentences that demonstrate the word's usage. Keep sentences short and easy to understand.
 
 Word to analyze: "%s"
 
@@ -83,22 +86,23 @@ Respond in this exact JSON format:
   "definition": "Chinese translation in traditional Chinese (only if valid)",
   "is_valid": true/false,
   "difficulty": 1-10 (only if valid, otherwise 0),
+  "examples": ["example sentence 1", "example sentence 2", "example sentence 3"] (only if valid, otherwise empty array),
   "reason": "explanation if invalid (e.g., 'This is not a real English word', 'This is a proper noun', 'This is past tense of run', 'This is plural form of cat')"
 }
-11b8519468844b36b813449148f00893
+
 Examples:
-- "asdfgh" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is not a real English word - appears to be random characters"}
-- "John" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a proper noun (person's name)"}
-- "ran" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is past tense of 'run'"}
-- "cats" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is plural form of 'cat'"}
-- "running" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is present participle of 'run'"}
-- "tion" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a word fragment/suffix, not a complete word"}
-- "beauti" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a partial word fragment from 'beautiful'"}
-- "pre" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a prefix, not a complete word"}
-- "un" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a prefix, not a complete word"}
-- "run" → {"definition": "跑", "is_valid": true, "difficulty": 2}
-- "cat" → {"definition": "貓", "is_valid": true, "difficulty": 1}
-- "sophisticated" → {"definition": "複雜的", "is_valid": true, "difficulty": 8}`, word)
+- "asdfgh" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is not a real English word - appears to be random characters"}
+- "John" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is a proper noun (person's name)"}
+- "ran" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is past tense of 'run'"}
+- "cats" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is plural form of 'cat'"}
+- "running" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is present participle of 'run'"}
+- "tion" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is a word fragment/suffix, not a complete word"}
+- "beauti" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is a partial word fragment from 'beautiful'"}
+- "pre" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is a prefix, not a complete word"}
+- "un" → {"definition": "", "is_valid": false, "difficulty": 0, "examples": [], "reason": "This is a prefix, not a complete word"}
+- "run" → {"definition": "跑", "is_valid": true, "difficulty": 2, "examples": ["I run every morning.", "She can run very fast.", "Let's run to the store."]}
+- "cat" → {"definition": "貓", "is_valid": true, "difficulty": 1, "examples": ["The cat is sleeping.", "I have a black cat.", "My cat likes fish."]}
+- "sophisticated" → {"definition": "複雜的", "is_valid": true, "difficulty": 8, "examples": ["This is a sophisticated system.", "She has sophisticated taste.", "The technology is very sophisticated."]}`, word)
 
 	// Create request
 	reqBody := GeminiRequest{
