@@ -53,7 +53,9 @@ STRICT VALIDATION RULES:
 3. REJECT proper nouns (names of people, places, brands, etc.)
 4. ONLY accept BASE FORMS of words (not verb tenses, plurals, or conjugations)
 5. Do NOT accept: past tense (ed), future tense (will + verb), present continuous (ing), plurals (s/es), comparative/superlative forms
-6. Accept: base verbs (run, eat, go), base nouns (cat, house, book), base adjectives (big, small, happy)
+6. REJECT word fragments, partial words, or incorrectly split vocabulary (e.g., "tion", "ing", "pre", "un", "ful")
+7. REJECT prefixes, suffixes, or word parts that are not complete words by themselves
+8. Accept: base verbs (run, eat, go), base nouns (cat, house, book), base adjectives (big, small, happy)
 
 EXAMPLES OF WORDS TO REJECT:
 - Random strings: "asdfgh", "xyzabc", "qwerty"
@@ -61,6 +63,8 @@ EXAMPLES OF WORDS TO REJECT:
 - Proper nouns: "John", "Paris", "Google", "iPhone"
 - Non-base forms: "running", "cats", "bigger", "went"
 - Misspellings: "helo" (instead of "hello"), "recieve" (instead of "receive")
+- Word fragments/parts: "tion", "ing", "pre", "un", "ful", "ness", "ly", "ed", "er", "est"
+- Partial words: "beauti" (from "beautiful"), "import" (from "important"), "comput" (from "computer")
 
 EXAMPLES OF WORDS TO ACCEPT:
 - Common nouns: "cat", "house", "book", "water"
@@ -81,13 +85,17 @@ Respond in this exact JSON format:
   "difficulty": 1-10 (only if valid, otherwise 0),
   "reason": "explanation if invalid (e.g., 'This is not a real English word', 'This is a proper noun', 'This is past tense of run', 'This is plural form of cat')"
 }
-
+11b8519468844b36b813449148f00893
 Examples:
 - "asdfgh" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is not a real English word - appears to be random characters"}
 - "John" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a proper noun (person's name)"}
 - "ran" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is past tense of 'run'"}
 - "cats" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is plural form of 'cat'"}
 - "running" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is present participle of 'run'"}
+- "tion" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a word fragment/suffix, not a complete word"}
+- "beauti" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a partial word fragment from 'beautiful'"}
+- "pre" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a prefix, not a complete word"}
+- "un" → {"definition": "", "is_valid": false, "difficulty": 0, "reason": "This is a prefix, not a complete word"}
 - "run" → {"definition": "跑", "is_valid": true, "difficulty": 2}
 - "cat" → {"definition": "貓", "is_valid": true, "difficulty": 1}
 - "sophisticated" → {"definition": "複雜的", "is_valid": true, "difficulty": 8}`, word)

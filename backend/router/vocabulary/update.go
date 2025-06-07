@@ -15,7 +15,11 @@ import (
 )
 
 type UpdateWordRequest struct {
-	Difficulty int `json:"difficulty,omitempty"`
+	Difficulty   int      `json:"difficulty,omitempty"`
+	PartOfSpeech string   `json:"part_of_speech,omitempty"`
+	Example      []string `json:"example,omitempty"`
+	RootWord     string   `json:"root_word,omitempty"`
+	Origin       string   `json:"origin,omitempty"`
 }
 
 type LearnWordRequest struct {
@@ -46,8 +50,8 @@ func UpdateWord(c echo.Context) error {
 		})
 	}
 
-	// Validate difficulty
-	if req.Difficulty < 1 || req.Difficulty > 10 {
+	// Validate difficulty if provided
+	if req.Difficulty != 0 && (req.Difficulty < 1 || req.Difficulty > 10) {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Difficulty must be between 1 and 10",
 		})
@@ -78,29 +82,66 @@ func UpdateWord(c echo.Context) error {
 		})
 	}
 
-	// Update the word's difficulty in the global words collection
-	wordsCollection := mongodb.GetCollection("words")
-	if wordsCollection == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Database connection error",
-		})
+	// Prepare update data for user word
+	updateData := bson.M{
+		"updated_at": time.Now(),
 	}
 
-	_, err = wordsCollection.UpdateOne(
+	// Add UserWord fields to update
+	if req.PartOfSpeech != "" {
+		updateData["part_of_speech"] = req.PartOfSpeech
+	}
+	if req.Example != nil {
+		updateData["example"] = req.Example
+	}
+	if req.RootWord != "" {
+		updateData["root_word"] = req.RootWord
+	}
+	if req.Origin != "" {
+		updateData["origin"] = req.Origin
+	}
+
+	// Update the user word
+	_, err = userWordsCollection.UpdateOne(
 		context.Background(),
-		bson.M{"_id": wordID},
 		bson.M{
-			"$set": bson.M{
-				"difficulty": req.Difficulty,
-				"updated_at": time.Now(),
-			},
+			"user_id": userID,
+			"word_id": wordID,
 		},
+		bson.M{"$set": updateData},
 	)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to update word",
+			"error": "Failed to update user word",
 		})
+	}
+
+	// Update the word's difficulty in the global words collection if provided
+	if req.Difficulty != 0 {
+		wordsCollection := mongodb.GetCollection("words")
+		if wordsCollection == nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Database connection error",
+			})
+		}
+
+		_, err = wordsCollection.UpdateOne(
+			context.Background(),
+			bson.M{"_id": wordID},
+			bson.M{
+				"$set": bson.M{
+					"difficulty": req.Difficulty,
+					"updated_at": time.Now(),
+				},
+			},
+		)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to update word difficulty",
+			})
+		}
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{

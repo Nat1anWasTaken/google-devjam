@@ -101,13 +101,17 @@ func CreateWord(c echo.Context) error {
 
 		now := time.Now()
 		userWord := model.UserWord{
-			ID:         userWordID,
-			UserID:     userID,
-			WordID:     existingWord.ID,
-			LearnCount: 0,
-			Fluency:    0,
-			CreatedAt:  now,
-			UpdatedAt:  now,
+			ID:           userWordID,
+			UserID:       userID,
+			WordID:       existingWord.ID,
+			LearnCount:   0,
+			Fluency:      0,
+			PartOfSpeech: "",
+			Example:      []string{},
+			RootWord:     "",
+			Origin:       "",
+			CreatedAt:    now,
+			UpdatedAt:    now,
 		}
 
 		_, err = userWordsCollection.InsertOne(context.Background(), userWord)
@@ -195,13 +199,17 @@ func CreateWord(c echo.Context) error {
 	}
 
 	userWord := model.UserWord{
-		ID:         userWordID,
-		UserID:     userID,
-		WordID:     wordID,
-		LearnCount: 0,
-		Fluency:    0,
-		CreatedAt:  now,
-		UpdatedAt:  now,
+		ID:           userWordID,
+		UserID:       userID,
+		WordID:       wordID,
+		LearnCount:   0,
+		Fluency:      0,
+		PartOfSpeech: "",
+		Example:      []string{},
+		RootWord:     "",
+		Origin:       "",
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	}
 
 	_, err = userWordsCollection.InsertOne(context.Background(), userWord)

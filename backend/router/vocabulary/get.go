@@ -16,8 +16,12 @@ import (
 
 type WordWithUserData struct {
 	model.Word
-	LearnCount int `json:"learn_count"`
-	Fluency    int `json:"fluency"`
+	LearnCount   int      `json:"learn_count"`
+	Fluency      int      `json:"fluency"`
+	PartOfSpeech string   `json:"part_of_speech"`
+	Example      []string `json:"example"`
+	RootWord     string   `json:"root_word"`
+	Origin       string   `json:"origin"`
 }
 
 type GetWordsResponse struct {
@@ -25,6 +29,31 @@ type GetWordsResponse struct {
 	Total int64              `json:"total"`
 	Page  int                `json:"page"`
 	Limit int                `json:"limit"`
+}
+
+// Helper functions to safely extract data from BSON
+func getStringFromBSON(data bson.M, key string) string {
+	if val, ok := data[key]; ok && val != nil {
+		if str, ok := val.(string); ok {
+			return str
+		}
+	}
+	return ""
+}
+
+func getStringArrayFromBSON(data bson.M, key string) []string {
+	if val, ok := data[key]; ok && val != nil {
+		if arr, ok := val.(primitive.A); ok {
+			result := make([]string, 0, len(arr))
+			for _, item := range arr {
+				if str, ok := item.(string); ok {
+					result = append(result, str)
+				}
+			}
+			return result
+		}
+	}
+	return []string{}
 }
 
 // GetWords retrieves all words for the authenticated user with pagination
@@ -170,15 +199,19 @@ func GetWords(c echo.Context) error {
 
 		word := WordWithUserData{
 			Word: model.Word{
-				ID:         wordData["_id"].(string),
-				Word:       wordData["word"].(string),
-				Definition: wordData["definition"].(string),
+				ID:         getStringFromBSON(wordData, "_id"),
+				Word:       getStringFromBSON(wordData, "word"),
+				Definition: getStringFromBSON(wordData, "definition"),
 				Difficulty: int(wordData["difficulty"].(int32)),
 				CreatedAt:  wordData["created_at"].(primitive.DateTime).Time(),
 				UpdatedAt:  wordData["updated_at"].(primitive.DateTime).Time(),
 			},
-			LearnCount: int(result["learn_count"].(int32)),
-			Fluency:    int(result["fluency"].(int32)),
+			LearnCount:   int(result["learn_count"].(int32)),
+			Fluency:      int(result["fluency"].(int32)),
+			PartOfSpeech: getStringFromBSON(result, "part_of_speech"),
+			Example:      getStringArrayFromBSON(result, "example"),
+			RootWord:     getStringFromBSON(result, "root_word"),
+			Origin:       getStringFromBSON(result, "origin"),
 		}
 
 		words = append(words, word)
@@ -264,18 +297,22 @@ func GetWord(c echo.Context) error {
 
 	word := WordWithUserData{
 		Word: model.Word{
-			ID:         wordData["_id"].(string),
-			Word:       wordData["word"].(string),
-			Definition: wordData["definition"].(string),
+			ID:         getStringFromBSON(wordData, "_id"),
+			Word:       getStringFromBSON(wordData, "word"),
+			Definition: getStringFromBSON(wordData, "definition"),
 			Difficulty: int(wordData["difficulty"].(int32)),
 			CreatedAt:  wordData["created_at"].(primitive.DateTime).Time(),
 			UpdatedAt:  wordData["updated_at"].(primitive.DateTime).Time(),
 		},
-		LearnCount: int(result["learn_count"].(int32)),
-		Fluency:    int(result["fluency"].(int32)),
+		LearnCount:   int(result["learn_count"].(int32)),
+		Fluency:      int(result["fluency"].(int32)),
+		PartOfSpeech: getStringFromBSON(result, "part_of_speech"),
+		Example:      getStringArrayFromBSON(result, "example"),
+		RootWord:     getStringFromBSON(result, "root_word"),
+		Origin:       getStringFromBSON(result, "origin"),
 	}
 
-	return c.JSON(http.StatusOK, WordResponse{
-		Word: word.Word,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"word": word,
 	})
 }

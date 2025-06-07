@@ -12,11 +12,20 @@ type Word struct {
 }
 
 type UserWord struct {
-	ID         string    `json:"id" bson:"_id"`
-	UserID     string    `json:"user_id" bson:"user_id"`
-	WordID     string    `json:"word_id" bson:"word_id"`
-	LearnCount int       `json:"learn_count" bson:"learn_count"`
-	Fluency    int       `json:"fluency" bson:"fluency"`
-	CreatedAt  time.Time `json:"created_at" bson:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at" bson:"updated_at"`
+	ID         string `json:"id" bson:"_id"`
+	UserID     string `json:"user_id" bson:"user_id"`
+	WordID     string `json:"word_id" bson:"word_id"`
+	LearnCount int    `json:"learn_count" bson:"learn_count"`
+	Fluency    int    `json:"fluency" bson:"fluency"`
+	PartOfSpeech string `json:"part_of_speech" bson:"part_of_speech"`
+	Example      []string `json:"example" bson:"example"`
+	RootWord     string `json:"root_word" bson:"root_word"`
+	Origin    string    `json:"origin" bson:"origin"`
+	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
+}
+
+type WordExample struct {
+	Sentence string `json:"sentence" bson:"sentence"`
+	Translation string `json:"translation" bson:"translation"`
 }
