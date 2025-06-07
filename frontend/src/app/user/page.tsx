@@ -11,13 +11,20 @@ import { cn, getDifficultyColor, getGravatarUrlSync } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Mail, User, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 export default function UserPage() {
   const { user, isLoading: userLoading } = useAuth();
 
-  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const queryClient = useQueryClient();
+
+  // Memoize the avatar URL to prevent unnecessary recalculations
+  const avatarUrl = useMemo(() => {
+    if (user?.email) {
+      return getGravatarUrlSync(user.email, 120);
+    }
+    return `https://www.gravatar.com/avatar/default?s=120&d=mp`;
+  }, [user?.email]);
 
   // Fetch user preferences
   const {
@@ -51,15 +58,6 @@ export default function UserPage() {
       console.error("Failed to update difficulty level:", error);
     }
   });
-
-  // Generate avatar URL when user is available
-  useEffect(() => {
-    if (user?.email) {
-      // Use sync version for immediate display
-      const url = getGravatarUrlSync(user.email, 120);
-      setAvatarUrl(url);
-    }
-  }, [user?.email]);
 
   const handleRemoveInterest = (interest: string) => {
     removeInterestMutation.mutate(interest);
