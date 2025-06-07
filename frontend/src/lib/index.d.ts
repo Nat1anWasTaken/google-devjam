@@ -31,3 +31,12 @@ type WordWithUserData = Word & {
   fluency: number; // 0-100 (integer)
   examples: WordExample[];
 };
+
+type UserPreferences = {
+  id: string;
+  user_id: string;
+  level: number; // 1-10
+  interests: string[];
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+};
