@@ -14,7 +14,7 @@ https://open-platform.theguardian.com/<br>
 
 
 2. 新聞影片學習模組
-google youtube data API：[text](https://developers.google.com/youtube/v3/ <br>getting-started?hl=zh-tw)
+google youtube data API：(https://developers.google.com/youtube/v3/
 
 3. 情境式AI生成文章模組
 Google ai stusio：https://aistudio.google.com<br>
