@@ -3,7 +3,9 @@ package news
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
@@ -23,6 +25,32 @@ type GetNewsResponse struct {
 
 type GetSingleNewsResponse struct {
 	News model.News `json:"news"`
+}
+
+// cleanAudioURLInGet ensures the audio URL contains only the path, stripping any hostname/protocol
+func cleanAudioURLInGet(audioURL string) string {
+	if audioURL == "" {
+		return ""
+	}
+
+	// If it's already just a path (starts with /), return as is
+	if strings.HasPrefix(audioURL, "/") && !strings.HasPrefix(audioURL, "//") {
+		return audioURL
+	}
+
+	// If it contains a protocol, parse it and return just the path
+	if strings.Contains(audioURL, "://") {
+		if parsedURL, err := url.Parse(audioURL); err == nil {
+			return parsedURL.Path
+		}
+	}
+
+	// If it doesn't start with /, add it
+	if !strings.HasPrefix(audioURL, "/") {
+		return "/" + audioURL
+	}
+
+	return audioURL
 }
 
 // GetNews retrieves news articles with pagination and filtering
@@ -116,6 +144,11 @@ func GetNews(c echo.Context) error {
 		})
 	}
 
+	// Clean audio URLs to ensure they only contain paths
+	for i := range news {
+		news[i].AudioURL = cleanAudioURLInGet(news[i].AudioURL)
+	}
+
 	return c.JSON(http.StatusOK, GetNewsResponse{
 		News:  news,
 		Total: total,
@@ -165,6 +198,9 @@ func GetSingleNews(c echo.Context) error {
 			"error": "Database error",
 		})
 	}
+
+	// Clean audio URL to ensure it only contains the path
+	news.AudioURL = cleanAudioURLInGet(news.AudioURL)
 
 	return c.JSON(http.StatusOK, GetSingleNewsResponse{
 		News: news,

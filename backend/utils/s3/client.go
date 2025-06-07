@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -71,10 +72,12 @@ func (c *Client) UploadAudio(audioData []byte, filename string, newsID string) (
 		return "", "", fmt.Errorf("failed to upload audio to S3: %v", err)
 	}
 
-	// Generate public URL (assuming bucket is public)
-	publicURL := fmt.Sprintf("/%s/%s",
-		c.bucketName,
-		objectKey)
+	// Generate public URL path only (no hostname/protocol)
+	// This ensures we return only the path part: /bucket/path/to/file
+	// Use simple string concatenation to avoid any MinIO URL generation
+	publicURL := "/" + c.bucketName + "/" + objectKey
+
+	log.Printf("S3 UploadAudio returning URL: '%s' (length: %d)", publicURL, len(publicURL))
 
 	return objectKey, publicURL, nil
 }

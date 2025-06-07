@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -316,6 +318,40 @@ func getUserVocabularyForNews(userID string) (learnWords []string, reviewWords [
 	return learnWords, reviewWords, nil
 }
 
+// cleanAudioURL ensures the audio URL contains only the path, stripping any hostname/protocol
+func cleanAudioURL(audioURL string) string {
+	if audioURL == "" {
+		return ""
+	}
+
+	// If it's already just a path (starts with /), return as is
+	if strings.HasPrefix(audioURL, "/") && !strings.HasPrefix(audioURL, "//") {
+		return audioURL
+	}
+
+	// If it contains a protocol, parse it and return just the path
+	if strings.Contains(audioURL, "://") {
+		if parsedURL, err := url.Parse(audioURL); err == nil {
+			return parsedURL.Path
+		}
+	}
+
+	// If it doesn't start with /, add it
+	if !strings.HasPrefix(audioURL, "/") {
+		return "/" + audioURL
+	}
+
+	return audioURL
+}
+
+// cleanNewsAudioURLs cleans audio URLs in a slice of news
+func cleanNewsAudioURLs(newsList []model.News) []model.News {
+	for i := range newsList {
+		newsList[i].AudioURL = cleanAudioURL(newsList[i].AudioURL)
+	}
+	return newsList
+}
+
 // getAllUserNews finds all the news for this specific user
 func getAllUserNews(userID string) ([]model.News, error) {
 	newsCollection := mongodb.GetCollection("news")
@@ -341,6 +377,9 @@ func getAllUserNews(userID string) ([]model.News, error) {
 	if err := cursor.All(context.Background(), &newsList); err != nil {
 		return nil, err
 	}
+
+	// Clean audio URLs to ensure they only contain paths
+	newsList = cleanNewsAudioURLs(newsList)
 
 	return newsList, nil
 }
@@ -375,6 +414,9 @@ func getRecentUserNews(userID string) (*model.News, error) {
 		}
 		return nil, err
 	}
+
+	// Clean audio URL to ensure it only contains the path
+	news.AudioURL = cleanAudioURL(news.AudioURL)
 
 	return &news, nil
 }
