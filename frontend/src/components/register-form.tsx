@@ -72,25 +72,25 @@ export function RegisterForm({ className, onSubmit, isSubmitting = false, error,
       <Card className="bg-transparent border-none shadow-none">
         <CardHeader>
           <CardTitle>註冊</CardTitle>
-          <CardDescription>Enter your information below to create your account</CardDescription>
+          <CardDescription>輸入你的資訊來創建你的帳號</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="displayName">Display Name</Label>
+                <Label htmlFor="displayName">用戶名稱</Label>
                 <Input id="displayName" name="displayName" type="text" placeholder="John Doe" value={formData.displayName} onChange={handleInputChange} required />
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">電子郵件</Label>
                 <Input id="email" name="email" type="email" placeholder="m@example.com" value={formData.email} onChange={handleInputChange} required />
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">密碼</Label>
                 <Input id="password" name="password" type="password" value={formData.password} onChange={handlePasswordChange} required />
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">確認密碼</Label>
                 <Input id="confirmPassword" name="confirmPassword" type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} required />
                 {passwordError && <p className="text-sm text-red-500 mt-1">{passwordError}</p>}
               </div>
@@ -99,10 +99,10 @@ export function RegisterForm({ className, onSubmit, isSubmitting = false, error,
                   {isSubmitting ? (
                     <>
                       <Loader2Icon className="animate-spin" />
-                      Creating your account...
+                      正在創建帳號...
                     </>
                   ) : (
-                    "Create Account"
+                    "創建帳號"
                   )}
                 </Button>
                 {error && (
@@ -113,9 +113,9 @@ export function RegisterForm({ className, onSubmit, isSubmitting = false, error,
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
+              已經擁有帳號？{" "}
               <a href="/login" className="underline underline-offset-4">
-                Sign in
+                登入
               </a>
             </div>
           </form>
