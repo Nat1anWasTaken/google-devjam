@@ -3,7 +3,7 @@ import { RegisterData } from "@/components/register-form";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
 
-export async function registerUser(userData: RegisterData) {
+export async function registerUser(userData: RegisterData): Promise<User> {
   const response = await fetch(`${baseUrl}/auth/register`, {
     credentials: "include",
     method: "POST",
@@ -26,7 +26,7 @@ export async function registerUser(userData: RegisterData) {
 
   return await response.json();
 }
-export async function loginUser(userData: LoginData) {
+export async function loginUser(userData: LoginData): Promise<User> {
   const response = await fetch(`${baseUrl}/auth/login`, {
     credentials: "include",
     method: "POST",
@@ -47,7 +47,7 @@ export async function loginUser(userData: LoginData) {
   return await response.json();
 }
 
-export async function getUser() {
+export async function getUser(): Promise<User | null> {
   const response = await fetch(`${baseUrl}/auth/me`, {
     credentials: "include",
     method: "GET",
