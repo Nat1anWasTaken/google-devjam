@@ -13,6 +13,7 @@ import { ArrowLeftIcon, TrashIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
+import { getDifficultyColor } from "@/lib/utils";
 
 export default function WordPage() {
   const params = useParams();
@@ -136,14 +137,6 @@ export default function WordPage() {
       </div>
     );
   }
-
-  // 難度顏色映射
-  const getDifficultyColor = (difficulty: number) => {
-    if (difficulty <= 3) return "bg-green-500";
-    if (difficulty <= 6) return "bg-yellow-500";
-    if (difficulty <= 8) return "bg-orange-500";
-    return "bg-red-500";
-  };
 
   return (
     <div className="py-8 px-6">

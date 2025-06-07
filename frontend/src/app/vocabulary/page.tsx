@@ -31,14 +31,7 @@ export default function VocabularyPage() {
             </div>
           ) : (
             query.data?.words.map((word) => (
-              <WordCard
-                key={word.id}
-                wordId={word.id}
-                word={word.word}
-                definition_zh={word.definition_zh}
-                definition_en={word.definition_en}
-                partOfSpeech={word.part_of_speech}
-              />
+              <WordCard key={word.id} word={word} />
             ))
           )}
         </div>
