@@ -60,7 +60,7 @@ export async function getUserPreferencesWithAutoCreate(): Promise<PreferencesRes
   } catch (error) {
     // Check if it's a 404 error (user preferences don't exist)
     if (error instanceof Error && (error as ApiError).fullResponse) {
-      const errorResponse = (error as ApiError).fullResponse as any;
+      const errorResponse = (error as ApiError).fullResponse as { status?: number; error?: string; message?: string };
 
       // If it's a 404 or similar "not found" error, create default preferences
       if (errorResponse?.status === 404 || errorResponse?.error?.includes("not found") || errorResponse?.error?.includes("Not found") || errorResponse?.message?.includes("not found")) {
