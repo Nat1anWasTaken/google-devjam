@@ -15,28 +15,32 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { createWord } from "@/lib/api/vocabulary";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function AddWordDialog() {
   const [open, setOpen] = useState(false);
   const [word, setWord] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const createWordMutation = useMutation({
+    mutationFn: createWord,
+    onSuccess: () => {
+      // Invalidate and refetch vocabulary queries
+      queryClient.invalidateQueries({ queryKey: ['vocabulary'] });
+      setWord("");
+      setOpen(false);
+    },
+    onError: (error) => {
+      console.error("Failed to create word:", error);
+      // TODO: Add proper error handling/toast notification
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!word.trim()) return;
 
-    setIsLoading(true);
-    try {
-      await createWord({ word: word.trim() });
-      setWord("");
-      setOpen(false);
-      // Optionally, you could trigger a refresh of the vocabulary list here
-    } catch (error) {
-      console.error("Failed to create word:", error);
-      // TODO: Add proper error handling/toast notification
-    } finally {
-      setIsLoading(false);
-    }
+    createWordMutation.mutate({ word: word.trim() });
   };
 
   return (
@@ -66,7 +70,7 @@ export function AddWordDialog() {
                 value={word}
                 onChange={(e) => setWord(e.target.value)}
                 placeholder="輸入單字..."
-                disabled={isLoading}
+                disabled={createWordMutation.isPending}
                 autoFocus
               />
             </div>
@@ -76,12 +80,12 @@ export function AddWordDialog() {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={isLoading}
+              disabled={createWordMutation.isPending}
             >
               取消
             </Button>
-            <Button type="submit" disabled={isLoading || !word.trim()}>
-              {isLoading ? "新增中..." : "新增"}
+            <Button type="submit" disabled={createWordMutation.isPending || !word.trim()}>
+              {createWordMutation.isPending ? "新增中..." : "新增"}
             </Button>
           </DialogFooter>
         </form>
