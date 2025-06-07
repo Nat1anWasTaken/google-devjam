@@ -5,14 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddInterestsDialog } from "@/components/add-interests-dialog";
+import { DifficultyLoadingAnimation } from "@/components/difficulty-loading-animation";
 import useAuth from "@/hooks/use-auth";
 import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
 import { cn, getDifficultyColor } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Mail, User, X } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function UserPage() {
   const { user, isLoading: userLoading } = useAuth();
+  const [optimisticLevel, setOptimisticLevel] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -42,10 +46,15 @@ export default function UserPage() {
   const updateLevelMutation = useMutation({
     mutationFn: (newLevel: number) => updateUserPreferences({ level: newLevel }),
     onSuccess: () => {
+      // Clear optimistic state and refresh data
+      setOptimisticLevel(null);
       queryClient.invalidateQueries({ queryKey: ["userPreferences"] });
     },
     onError: (error) => {
       console.error("Failed to update difficulty level:", error);
+      // Rollback optimistic update
+      setOptimisticLevel(null);
+      toast.error("無法更新難度等級，請稍後再試");
     }
   });
 
@@ -53,7 +62,7 @@ export default function UserPage() {
     removeInterestMutation.mutate(interest);
   };
 
-  const handleLevelChange = (direction: "increase" | "decrease") => {
+  const handleLevelChange = async (direction: "increase" | "decrease") => {
     const currentLevel = preferences?.level || 1;
     let newLevel = currentLevel;
 
@@ -64,7 +73,15 @@ export default function UserPage() {
     }
 
     if (newLevel !== currentLevel) {
-      updateLevelMutation.mutate(newLevel);
+      // Update UI immediately (optimistic)
+      setOptimisticLevel(newLevel);
+
+      // Perform mutation in background
+      try {
+        await updateLevelMutation.mutateAsync(newLevel);
+      } catch (error) {
+        // Error handling is done in the mutation's onError callback
+      }
     }
   };
 
@@ -87,7 +104,8 @@ export default function UserPage() {
 
   const preferences = preferencesData?.preferences;
   const interests = preferences?.interests || [];
-  const level = preferences?.level || 1;
+  // Use optimistic level if available, otherwise fall back to server data
+  const level = optimisticLevel ?? preferences?.level ?? 1;
 
   return (
     <div className="h-full w-full px-6 py-8 overflow-auto">
@@ -131,29 +149,54 @@ export default function UserPage() {
                 <p className="text-muted-foreground">無法載入用戶偏好設定</p>
               </div>
             ) : (
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-4 relative">
+                {/* Loading Overlay */}
+                {updateLevelMutation.isPending && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                    <DifficultyLoadingAnimation />
+                  </div>
+                )}
+
                 {/* Level Display with Arrow Controls */}
                 <div className="flex items-center justify-center gap-4">
                   {/* Decrease Button */}
-                  <Button variant="outline" size="icon" onClick={() => handleLevelChange("decrease")} disabled={level <= 1 || updateLevelMutation.isPending} className="h-12 w-12">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleLevelChange("decrease")}
+                    disabled={level <= 1 || updateLevelMutation.isPending}
+                    className="h-12 w-12 transition-all duration-200 hover:scale-105"
+                  >
                     <ChevronLeft className="size-5" />
                     <span className="sr-only">降低難度等級</span>
                   </Button>
 
                   {/* Level Display */}
-                  <div className={cn("inline-flex items-center justify-center rounded-lg px-6 py-4 text-white font-bold text-3xl shadow-lg min-w-[160px]", getDifficultyColor(level))}>
+                  <div
+                    className={cn(
+                      "inline-flex items-center justify-center rounded-lg px-6 py-4 text-white font-bold text-3xl shadow-lg min-w-[160px] transition-all duration-300 transform",
+                      getDifficultyColor(level),
+                      optimisticLevel && "scale-110"
+                    )}
+                  >
                     Level {level}
                   </div>
 
                   {/* Increase Button */}
-                  <Button variant="outline" size="icon" onClick={() => handleLevelChange("increase")} disabled={level >= 10 || updateLevelMutation.isPending} className="h-12 w-12">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleLevelChange("increase")}
+                    disabled={level >= 10 || updateLevelMutation.isPending}
+                    className="h-12 w-12 transition-all duration-200 hover:scale-105"
+                  >
                     <ChevronRight className="size-5" />
                     <span className="sr-only">提高難度等級</span>
                   </Button>
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground transition-all duration-300">
                   {level <= 3 && "初級程度 - 適合基礎學習"}
                   {level > 3 && level <= 6 && "中級程度 - 適合進階學習"}
                   {level > 6 && level <= 8 && "高級程度 - 適合深度學習"}
