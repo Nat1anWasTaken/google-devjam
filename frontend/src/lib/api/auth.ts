@@ -1,8 +1,9 @@
 import { LoginData } from "@/components/login-form";
 import { RegisterData } from "@/components/register-form";
 
-export const registerUser = async (userData: RegisterData) => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
+
+export async function registerUser(userData: RegisterData) {
   const response = await fetch(`${baseUrl}/auth/register`, {
     credentials: "include",
     method: "POST",
@@ -24,10 +25,8 @@ export const registerUser = async (userData: RegisterData) => {
   }
 
   return await response.json();
-};
-
-export const loginUser = async (userData: LoginData) => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE || "";
+}
+export async function loginUser(userData: LoginData) {
   const response = await fetch(`${baseUrl}/auth/login`, {
     credentials: "include",
     method: "POST",
@@ -42,10 +41,28 @@ export const loginUser = async (userData: LoginData) => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    const error = new Error(errorData.message || "Failed to login");
-    (error as any).fullResponse = errorData;
-    throw error;
+    throw new Error(errorData.message || "Failed to login");
   }
 
   return await response.json();
-};
+}
+
+export async function getUser() {
+  const response = await fetch(`${baseUrl}/auth/me`, {
+    credentials: "include",
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      return null; // User not authenticated
+    }
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch user");
+  }
+
+  return await response.json();
+}

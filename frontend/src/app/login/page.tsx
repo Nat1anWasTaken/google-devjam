@@ -1,7 +1,7 @@
 "use client";
 
 import { LoginData, LoginForm } from "@/components/login-form";
-import { loginUser } from "@/lib/api";
+import { loginUser } from "@/lib/api/auth";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 

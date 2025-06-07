@@ -1,6 +1,23 @@
+"use client";
+
+import { BottomNavigation, TabType } from "@/components/bottom-navigation";
+import { useState } from "react";
+
 export default function Home() {
-  <div className="flex flex-col h-full w-full justify-between">
-    <div className="flex-grow"></div>
-    <div></div>
-  </div>;
+  const [activeTab, setActiveTab] = useState<TabType>("vocabulary");
+
+  return (
+    <>
+      <div className="h-full w-full flex flex-col justify-center items-center">
+        <h1 className="text-2xl font-bold">Welcome to the Home Page</h1>
+        <p className="mt-4">Please navigate to the login or register page.</p>
+      </div>
+      <BottomNavigation
+        activeTab={activeTab}
+        onTabChange={(tab: TabType) => {
+          setActiveTab(tab);
+        }}
+      />
+    </>
+  );
 }
