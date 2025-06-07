@@ -18,7 +18,7 @@ type GetNewsParams = {
 
 // Response types
 type GenerateNewsResponse = {
-  news: News;
+  all_news: News[];
 };
 
 type GetNewsResponse = {
