@@ -53,6 +53,33 @@ export async function getUserPreferences(): Promise<PreferencesResponse> {
   return responseData;
 }
 
+export async function getUserPreferencesWithAutoCreate(): Promise<PreferencesResponse> {
+  try {
+    // First, try to get existing preferences
+    return await getUserPreferences();
+  } catch (error) {
+    // Check if it's a 404 error (user preferences don't exist)
+    if (error instanceof Error && (error as ApiError).fullResponse) {
+      const errorResponse = (error as ApiError).fullResponse as any;
+
+      // If it's a 404 or similar "not found" error, create default preferences
+      if (errorResponse?.status === 404 || errorResponse?.error?.includes("not found") || errorResponse?.error?.includes("Not found") || errorResponse?.message?.includes("not found")) {
+        // Create default preferences
+        const defaultPreferences: CreatePreferencesRequest = {
+          level: 1, // Start with beginner level
+          interests: [] // Empty interests array, user can add later
+        };
+
+        // Create and return the new preferences
+        return await createUserPreferences(defaultPreferences);
+      }
+    }
+
+    // If it's not a 404 error, re-throw the original error
+    throw error;
+  }
+}
+
 export async function createUserPreferences(data: CreatePreferencesRequest): Promise<PreferencesResponse> {
   const response = await fetch(`${baseUrl}/user/preferences`, {
     credentials: "include",

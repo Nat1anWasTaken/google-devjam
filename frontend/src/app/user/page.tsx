@@ -8,7 +8,7 @@ import { AddInterestsDialog } from "@/components/add-interests-dialog";
 import { InstallButton } from "@/components/install-button";
 import useAuth from "@/hooks/use-auth";
 import { logout } from "@/lib/api/auth";
-import { getUserPreferences, removeInterest, updateUserPreferences } from "@/lib/api/user";
+import { getUserPreferencesWithAutoCreate, removeInterest, updateUserPreferences } from "@/lib/api/user";
 import { cn, getDifficultyColor } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, LoaderCircle, LogOut, Mail, User, X } from "lucide-react";
@@ -24,13 +24,9 @@ export default function UserPage() {
   const queryClient = useQueryClient();
 
   // Fetch user preferences
-  const {
-    data: preferencesData,
-    isLoading: preferencesLoading,
-    error: preferencesError
-  } = useQuery({
+  const { data: preferencesData, isLoading: preferencesLoading } = useQuery({
     queryKey: ["userPreferences"],
-    queryFn: getUserPreferences,
+    queryFn: getUserPreferencesWithAutoCreate,
     enabled: !!user
   });
 
@@ -159,10 +155,6 @@ export default function UserPage() {
           <CardContent>
             {preferencesLoading ? (
               <Skeleton className="h-16 w-full" />
-            ) : preferencesError ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">無法載入用戶偏好設定</p>
-              </div>
             ) : (
               <div className="text-center space-y-4 relative">
                 {/* Level Display with Arrow Controls */}
