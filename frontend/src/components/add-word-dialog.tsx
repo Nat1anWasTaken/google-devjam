@@ -44,9 +44,11 @@ export function AddWordDialog() {
       <DialogTrigger asChild>
         <Button
           size="icon"
-          className="size-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 bg-primary hover:bg-primary/90"
+          className="size-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 bg-primary hover:bg-primary/90 relative overflow-hidden
+                     before:absolute before:inset-0 before:rounded-full before:bg-primary/20 before:animate-ping before:opacity-75
+                     after:absolute after:inset-0 after:rounded-full after:shadow-[0_0_15px_rgba(var(--primary),0.5)] after:animate-pulse"
         >
-          <Plus className="size-6" />
+          <Plus className="size-6 relative z-10" />
           <span className="sr-only">新增單字</span>
         </Button>
       </DialogTrigger>
