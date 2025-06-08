@@ -93,13 +93,21 @@ const WordHighlighter: React.FC<WordHighlighterProps> = ({ words, currentWordInd
 
 export const TtsAudioPlayer: React.FC<TtsAudioPlayerProps> = ({ text, newsId: _newsId, className }) => {
   const [showControls, setShowControls] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [speechRate, setSpeechRate] = useState(1);
 
   const { state, controls, words, availableVoices, selectedVoiceIndex } = useTextToSpeech(text, {
     rate: speechRate
   });
 
-  const { isPlaying, isPaused, currentWordIndex, progress, duration, isSupported, error } = state;
+  const { isPlaying, isPaused, currentWordIndex, progress, duration, isSupported, error, debugInfo } = state;
+
+  // Show debug info automatically in development or when there's an error
+  React.useEffect(() => {
+    if (debugInfo?.environment === "development" || error) {
+      setShowDebugInfo(true);
+    }
+  }, [debugInfo?.environment, error]);
 
   // Handle play/pause
   const handlePlayPause = () => {
@@ -243,6 +251,72 @@ export const TtsAudioPlayer: React.FC<TtsAudioPlayerProps> = ({ text, newsId: _n
 
           {/* Word Highlighter */}
           {words.length > 0 && <WordHighlighter words={words} currentWordIndex={currentWordIndex} onWordClick={handleWordClick} isPlaying={isPlaying} />}
+
+          {/* Debug Information Panel */}
+          {showDebugInfo && debugInfo && (
+            <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-medium">Debug Information</h4>
+                <Button variant="ghost" size="sm" onClick={() => setShowDebugInfo(false)} className="h-6 px-2 text-xs">
+                  Hide
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="font-medium">Environment:</span> {debugInfo.environment}
+                </div>
+                <div>
+                  <span className="font-medium">HTTPS:</span> {debugInfo.isHttps ? "Yes" : "No"}
+                </div>
+                <div>
+                  <span className="font-medium">Voices Loaded:</span> {debugInfo.voicesLoaded ? "Yes" : "No"}
+                </div>
+                <div>
+                  <span className="font-medium">Voice Count:</span> {debugInfo.voiceCount}
+                </div>
+                <div className="col-span-2">
+                  <span className="font-medium">Last Action:</span> {debugInfo.lastAction}
+                </div>
+                {debugInfo.lastError && (
+                  <div className="col-span-2 text-destructive">
+                    <span className="font-medium">Last Error:</span> {debugInfo.lastError}
+                  </div>
+                )}
+                <div className="col-span-2 break-all">
+                  <span className="font-medium">User Agent:</span> {debugInfo.userAgent.substring(0, 100)}...
+                </div>
+              </div>
+              <div className="mt-2 pt-2 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    console.log("Full TTS Debug Info:", debugInfo);
+                    console.log("Available Voices:", availableVoices);
+                    console.log("TTS State:", state);
+                  }}
+                  className="h-6 px-2 text-xs"
+                >
+                  Log Full Debug Info
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Error with Debug Toggle */}
+          {!showDebugInfo && (debugInfo?.environment === "production" || error) && (
+            <div className="mt-4 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-4 w-4 text-destructive" />
+                  <span className="text-sm text-destructive">{error || "TTS may not be working properly"}</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setShowDebugInfo(true)} className="h-6 px-2 text-xs">
+                  Show Debug Info
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

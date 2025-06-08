@@ -10,6 +10,15 @@ export interface TtsState {
   duration: number;
   isSupported: boolean;
   error: string | null;
+  debugInfo?: {
+    environment: string;
+    isHttps: boolean;
+    userAgent: string;
+    voicesLoaded: boolean;
+    voiceCount: number;
+    lastAction: string;
+    lastError: string | null;
+  };
 }
 
 export interface TtsControls {
@@ -50,46 +59,141 @@ export const useTextToSpeech = (text: string, options: UseTextToSpeechOptions = 
   const pausedTimeRef = useRef<number>(0);
   const isPausingRef = useRef(false);
 
-  // Check browser support
+  // Debug logging function
+  const debugLog = useCallback(
+    (action: string, data?: Record<string, unknown>) => {
+      const timestamp = new Date().toISOString();
+      const environment = process.env.NODE_ENV || "unknown";
+      console.log(`[TTS Debug ${timestamp}] ${action}:`, data);
+
+      setState((prev) => ({
+        ...prev,
+        debugInfo: {
+          ...prev.debugInfo,
+          environment,
+          isHttps: typeof window !== "undefined" ? window.location.protocol === "https:" : false,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+          voicesLoaded: availableVoices.length > 0,
+          voiceCount: availableVoices.length,
+          lastAction: action,
+          lastError: (typeof data?.error === "string" ? data.error : null) || prev.debugInfo?.lastError || null
+        }
+      }));
+    },
+    [availableVoices.length]
+  );
+
+  // Check browser support with enhanced debugging
   useEffect(() => {
+    debugLog("Initializing TTS", {
+      speechSynthesis: "speechSynthesis" in window,
+      location: typeof window !== "undefined" ? window.location.href : "server",
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown"
+    });
+
     const supported = "speechSynthesis" in window;
     setState((prev) => ({ ...prev, isSupported: supported }));
 
     if (!supported) {
+      const errorMsg = "Speech synthesis is not supported in this browser";
+      debugLog("Browser not supported", { error: errorMsg });
       setState((prev) => ({
         ...prev,
-        error: "Speech synthesis is not supported in this browser"
+        error: errorMsg
       }));
+    } else {
+      // Additional browser capability checks
+      debugLog("Browser capabilities", {
+        speechSynthesis: !!window.speechSynthesis,
+        SpeechSynthesisUtterance: !!window.SpeechSynthesisUtterance,
+        getVoices: !!window.speechSynthesis?.getVoices,
+        speaking: window.speechSynthesis?.speaking,
+        pending: window.speechSynthesis?.pending,
+        paused: window.speechSynthesis?.paused
+      });
     }
-  }, []);
+  }, [debugLog]);
 
-  // Load English voices
+  // Load English voices with enhanced debugging
   useEffect(() => {
-    if (!("speechSynthesis" in window)) return;
+    if (!("speechSynthesis" in window)) {
+      debugLog("Voice loading skipped - no speechSynthesis");
+      return;
+    }
 
     const loadVoices = () => {
-      const voices = speechSynthesis.getVoices();
-      const englishVoices = voices
-        .filter((voice) => voice.lang.startsWith("en"))
-        .sort((a, b) => {
-          // Prefer US English, then UK English, then others
-          if (a.lang === "en-US" && b.lang !== "en-US") return -1;
-          if (b.lang === "en-US" && a.lang !== "en-US") return 1;
-          if (a.lang === "en-GB" && b.lang !== "en-GB") return -1;
-          if (b.lang === "en-GB" && a.lang !== "en-GB") return 1;
-          return a.name.localeCompare(b.name);
+      try {
+        const voices = speechSynthesis.getVoices();
+        debugLog("Raw voices loaded", {
+          totalVoices: voices.length,
+          voicesList: voices.map((v) => ({ name: v.name, lang: v.lang, default: v.default, localService: v.localService }))
         });
 
-      setAvailableVoices(englishVoices);
+        const englishVoices = voices
+          .filter((voice) => voice.lang.startsWith("en"))
+          .sort((a, b) => {
+            // Prefer US English, then UK English, then others
+            if (a.lang === "en-US" && b.lang !== "en-US") return -1;
+            if (b.lang === "en-US" && a.lang !== "en-US") return 1;
+            if (a.lang === "en-GB" && b.lang !== "en-GB") return -1;
+            if (b.lang === "en-GB" && a.lang !== "en-GB") return 1;
+            return a.name.localeCompare(b.name);
+          });
+
+        debugLog("English voices filtered", {
+          englishVoiceCount: englishVoices.length,
+          englishVoices: englishVoices.map((v) => ({ name: v.name, lang: v.lang, default: v.default }))
+        });
+
+        setAvailableVoices(englishVoices);
+
+        // Update debug info with voice loading status
+        setState((prev) => ({
+          ...prev,
+          debugInfo: {
+            environment: prev.debugInfo?.environment || "unknown",
+            isHttps: prev.debugInfo?.isHttps || false,
+            userAgent: prev.debugInfo?.userAgent || "unknown",
+            voicesLoaded: englishVoices.length > 0,
+            voiceCount: englishVoices.length,
+            lastAction: "voices_loaded",
+            lastError: prev.debugInfo?.lastError || null
+          }
+        }));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        debugLog("Voice loading error", { error: errorMessage });
+        setState((prev) => ({
+          ...prev,
+          error: `Failed to load voices: ${errorMessage}`
+        }));
+      }
     };
 
+    debugLog("Initial voice loading attempt");
     loadVoices();
 
     // Some browsers load voices asynchronously
     if (speechSynthesis.onvoiceschanged !== undefined) {
-      speechSynthesis.onvoiceschanged = loadVoices;
+      debugLog("Setting up onvoiceschanged listener");
+      speechSynthesis.onvoiceschanged = () => {
+        debugLog("onvoiceschanged event triggered");
+        loadVoices();
+      };
+    } else {
+      debugLog("onvoiceschanged not available");
     }
-  }, []);
+
+    // Retry voice loading after a delay (some browsers need this)
+    const retryTimeout = setTimeout(() => {
+      debugLog("Retry voice loading after timeout");
+      loadVoices();
+    }, 1000);
+
+    return () => {
+      clearTimeout(retryTimeout);
+    };
+  }, [debugLog]);
 
   // Process text into words
   useEffect(() => {
@@ -111,54 +215,241 @@ export const useTextToSpeech = (text: string, options: UseTextToSpeechOptions = 
     setState((prev) => ({ ...prev, duration: estimatedDuration }));
   }, [text, rate]);
 
-  // Create and configure utterance
+  // Create and configure utterance with enhanced debugging
   const createUtterance = useCallback(
     (textToSpeak: string, startWordIndex: number = 0) => {
-      if (!("speechSynthesis" in window)) return null;
+      debugLog("Creating utterance", {
+        textLength: textToSpeak.length,
+        startWordIndex,
+        selectedVoice: availableVoices[selectedVoiceIndex]?.name || "none",
+        parameters: { rate, pitch, volume }
+      });
 
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-
-      // Set voice
-      if (availableVoices[selectedVoiceIndex]) {
-        utterance.voice = availableVoices[selectedVoiceIndex];
+      if (!("speechSynthesis" in window)) {
+        debugLog("utterance creation failed - no speechSynthesis");
+        return null;
       }
 
-      // Set speech parameters
-      utterance.rate = rate;
-      utterance.pitch = pitch;
-      utterance.volume = volume;
+      try {
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
 
-      // Track word boundaries (not all browsers support this)
-      utterance.onboundary = (event) => {
-        if (event.name === "word") {
-          const wordIndex = startWordIndex + Math.floor(event.charIndex / 6); // Rough estimate
-          currentWordIndexRef.current = Math.min(wordIndex, words.length - 1);
+        // Set voice
+        if (availableVoices[selectedVoiceIndex]) {
+          utterance.voice = availableVoices[selectedVoiceIndex];
+          debugLog("Voice set", { voiceName: utterance.voice.name, voiceLang: utterance.voice.lang });
+        } else {
+          debugLog("No voice selected or available", { availableCount: availableVoices.length, selectedIndex: selectedVoiceIndex });
+        }
 
+        // Set speech parameters
+        utterance.rate = rate;
+        utterance.pitch = pitch;
+        utterance.volume = volume;
+
+        // Track word boundaries (not all browsers support this)
+        utterance.onboundary = (event) => {
+          debugLog("Word boundary event", { name: event.name, charIndex: event.charIndex });
+          if (event.name === "word") {
+            const wordIndex = startWordIndex + Math.floor(event.charIndex / 6); // Rough estimate
+            currentWordIndexRef.current = Math.min(wordIndex, words.length - 1);
+
+            setState((prev) => ({
+              ...prev,
+              currentWordIndex: currentWordIndexRef.current,
+              progress: (currentWordIndexRef.current / words.length) * 100
+            }));
+          }
+        };
+
+        utterance.onstart = () => {
+          debugLog("Speech started");
+          startTimeRef.current = Date.now();
+          setState((prev) => ({ ...prev, isPlaying: true, isPaused: false, error: null }));
+        };
+
+        utterance.onpause = () => {
+          debugLog("Speech paused");
+          pausedTimeRef.current = Date.now();
+          setState((prev) => ({ ...prev, isPaused: true }));
+        };
+
+        utterance.onresume = () => {
+          debugLog("Speech resumed");
+          const pausedDuration = Date.now() - pausedTimeRef.current;
+          startTimeRef.current += pausedDuration;
+          setState((prev) => ({ ...prev, isPaused: false }));
+        };
+
+        utterance.onend = () => {
+          debugLog("Speech ended");
           setState((prev) => ({
             ...prev,
-            currentWordIndex: currentWordIndexRef.current,
-            progress: (currentWordIndexRef.current / words.length) * 100
+            isPlaying: false,
+            isPaused: false,
+            currentWordIndex: 0,
+            progress: 0
+          }));
+          currentWordIndexRef.current = 0;
+        };
+
+        utterance.onerror = (event) => {
+          debugLog("Speech error", {
+            error: event.error,
+            isPausingRef: isPausingRef.current,
+            speechSynthesisState: {
+              speaking: speechSynthesis.speaking,
+              pending: speechSynthesis.pending,
+              paused: speechSynthesis.paused
+            }
+          });
+
+          // Don't treat "interrupted" as an error when we're intentionally pausing
+          if (event.error === "interrupted" && isPausingRef.current) {
+            isPausingRef.current = false;
+            debugLog("Interrupted error ignored (intentional pause)");
+            return;
+          }
+
+          const errorMessage = `Speech synthesis error: ${event.error}`;
+          setState((prev) => ({
+            ...prev,
+            isPlaying: false,
+            isPaused: false,
+            error: errorMessage
+          }));
+        };
+
+        debugLog("Utterance created successfully");
+        return utterance;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        debugLog("Utterance creation failed", { error: errorMessage });
+        setState((prev) => ({
+          ...prev,
+          error: `Failed to create utterance: ${errorMessage}`
+        }));
+        return null;
+      }
+    },
+    [availableVoices, selectedVoiceIndex, rate, pitch, volume, words.length, debugLog]
+  );
+
+  const controls: TtsControls = {
+    play: () => {
+      debugLog("Play button clicked", {
+        isSupported: state.isSupported,
+        hasText: !!text,
+        wordCount: words.length,
+        isPaused: state.isPaused,
+        currentWordIndex: currentWordIndexRef.current,
+        speechSynthesisState: {
+          speaking: speechSynthesis.speaking,
+          pending: speechSynthesis.pending,
+          paused: speechSynthesis.paused
+        }
+      });
+
+      if (!state.isSupported) {
+        debugLog("Play aborted - not supported");
+        return;
+      }
+      if (!text) {
+        debugLog("Play aborted - no text");
+        return;
+      }
+      if (words.length === 0) {
+        debugLog("Play aborted - no words");
+        return;
+      }
+
+      try {
+        // Always cancel any existing speech
+        if (speechSynthesis.speaking) {
+          debugLog("Cancelling existing speech");
+          speechSynthesis.cancel();
+        }
+
+        // Check user interaction requirement (required in many browsers)
+        if (typeof window !== "undefined" && window.navigator.userActivation && !window.navigator.userActivation.hasBeenActive) {
+          debugLog("User activation required but not present");
+          setState((prev) => ({
+            ...prev,
+            error: "User interaction required. Please try clicking the play button again."
+          }));
+          return;
+        }
+
+        // Start from current position (either beginning or where we paused)
+        const startIndex = state.isPaused ? currentWordIndexRef.current : 0;
+        const textToSpeak = words.slice(startIndex).join(" ");
+
+        debugLog("Starting speech", {
+          startIndex,
+          textToSpeakLength: textToSpeak.length,
+          firstWords: textToSpeak.substring(0, 50) + "..."
+        });
+
+        const utterance = createUtterance(textToSpeak, startIndex);
+
+        if (utterance) {
+          utteranceRef.current = utterance;
+
+          // Check if speech synthesis is ready
+          if (speechSynthesis.speaking || speechSynthesis.pending) {
+            debugLog("Speech synthesis busy, waiting...");
+            setTimeout(() => {
+              speechSynthesis.speak(utterance);
+            }, 100);
+          } else {
+            debugLog("Speaking utterance");
+            speechSynthesis.speak(utterance);
+          }
+        } else {
+          debugLog("Failed to create utterance");
+          setState((prev) => ({
+            ...prev,
+            error: "Failed to create speech utterance"
           }));
         }
-      };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        debugLog("Play error", { error: errorMessage });
+        setState((prev) => ({
+          ...prev,
+          error: `Failed to play: ${errorMessage}`
+        }));
+      }
+    },
 
-      utterance.onstart = () => {
-        startTimeRef.current = Date.now();
-        setState((prev) => ({ ...prev, isPlaying: true, isPaused: false, error: null }));
-      };
+    pause: () => {
+      debugLog("Pause button clicked", {
+        speechSynthesisState: {
+          speaking: speechSynthesis.speaking,
+          pending: speechSynthesis.pending,
+          paused: speechSynthesis.paused
+        }
+      });
 
-      utterance.onpause = () => {
-        pausedTimeRef.current = Date.now();
-        setState((prev) => ({ ...prev, isPaused: true }));
-      };
+      try {
+        if (speechSynthesis.speaking) {
+          debugLog("Pausing speech");
+          isPausingRef.current = true;
+          speechSynthesis.cancel();
+          setState((prev) => ({ ...prev, isPlaying: false, isPaused: true }));
+        } else {
+          debugLog("No speech to pause");
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        debugLog("Pause error", { error: errorMessage });
+      }
+    },
 
-      utterance.onresume = () => {
-        const pausedDuration = Date.now() - pausedTimeRef.current;
-        startTimeRef.current += pausedDuration;
-        setState((prev) => ({ ...prev, isPaused: false }));
-      };
+    stop: () => {
+      debugLog("Stop button clicked");
 
-      utterance.onend = () => {
+      try {
+        speechSynthesis.cancel();
         setState((prev) => ({
           ...prev,
           isPlaying: false,
@@ -167,90 +458,50 @@ export const useTextToSpeech = (text: string, options: UseTextToSpeechOptions = 
           progress: 0
         }));
         currentWordIndexRef.current = 0;
-      };
-
-      utterance.onerror = (event) => {
-        // Don't treat "interrupted" as an error when we're intentionally pausing
-        if (event.error === "interrupted" && isPausingRef.current) {
-          isPausingRef.current = false;
-          return;
-        }
-
-        setState((prev) => ({
-          ...prev,
-          isPlaying: false,
-          isPaused: false,
-          error: `Speech synthesis error: ${event.error}`
-        }));
-      };
-
-      return utterance;
-    },
-    [availableVoices, selectedVoiceIndex, rate, pitch, volume, words.length]
-  );
-
-  const controls: TtsControls = {
-    play: () => {
-      if (!state.isSupported || !text || words.length === 0) return;
-
-      // Always cancel any existing speech
-      if (speechSynthesis.speaking) {
-        speechSynthesis.cancel();
+        debugLog("Speech stopped successfully");
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        debugLog("Stop error", { error: errorMessage });
       }
-
-      // Start from current position (either beginning or where we paused)
-      const startIndex = state.isPaused ? currentWordIndexRef.current : 0;
-      const textToSpeak = words.slice(startIndex).join(" ");
-      const utterance = createUtterance(textToSpeak, startIndex);
-
-      if (utterance) {
-        utteranceRef.current = utterance;
-        speechSynthesis.speak(utterance);
-      }
-    },
-
-    pause: () => {
-      if (speechSynthesis.speaking) {
-        isPausingRef.current = true;
-        speechSynthesis.cancel();
-        setState((prev) => ({ ...prev, isPlaying: false, isPaused: true }));
-      }
-    },
-
-    stop: () => {
-      speechSynthesis.cancel();
-      setState((prev) => ({
-        ...prev,
-        isPlaying: false,
-        isPaused: false,
-        currentWordIndex: 0,
-        progress: 0
-      }));
-      currentWordIndexRef.current = 0;
     },
 
     seekToWord: (wordIndex: number) => {
-      if (wordIndex < 0 || wordIndex >= words.length) return;
+      debugLog("Seek to word", { wordIndex, totalWords: words.length });
 
-      speechSynthesis.cancel();
+      if (wordIndex < 0 || wordIndex >= words.length) {
+        debugLog("Invalid word index", { wordIndex, totalWords: words.length });
+        return;
+      }
 
-      const textToSpeak = words.slice(wordIndex).join(" ");
-      const utterance = createUtterance(textToSpeak, wordIndex);
+      try {
+        speechSynthesis.cancel();
 
-      if (utterance) {
-        utteranceRef.current = utterance;
-        currentWordIndexRef.current = wordIndex;
-        setState((prev) => ({
-          ...prev,
-          currentWordIndex: wordIndex,
-          progress: (wordIndex / words.length) * 100
-        }));
-        speechSynthesis.speak(utterance);
+        const textToSpeak = words.slice(wordIndex).join(" ");
+        const utterance = createUtterance(textToSpeak, wordIndex);
+
+        if (utterance) {
+          utteranceRef.current = utterance;
+          currentWordIndexRef.current = wordIndex;
+          setState((prev) => ({
+            ...prev,
+            currentWordIndex: wordIndex,
+            progress: (wordIndex / words.length) * 100
+          }));
+          speechSynthesis.speak(utterance);
+          debugLog("Seek completed");
+        } else {
+          debugLog("Failed to create utterance for seek");
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        debugLog("Seek error", { error: errorMessage });
       }
     },
 
     setRate: (newRate: number) => {
-      Math.max(0.1, Math.min(10, newRate)); // Validate rate bounds
+      const validatedRate = Math.max(0.1, Math.min(10, newRate));
+      debugLog("Set rate", { requestedRate: newRate, validatedRate, isPlaying: state.isPlaying });
+
       // If currently playing, restart with new rate
       if (state.isPlaying) {
         const currentWordIndex = currentWordIndexRef.current;
@@ -262,35 +513,52 @@ export const useTextToSpeech = (text: string, options: UseTextToSpeechOptions = 
     },
 
     setVoice: (voiceIndex: number) => {
+      debugLog("Set voice", {
+        voiceIndex,
+        availableVoices: availableVoices.length,
+        currentVoice: availableVoices[selectedVoiceIndex]?.name,
+        newVoice: availableVoices[voiceIndex]?.name
+      });
+
       if (voiceIndex >= 0 && voiceIndex < availableVoices.length) {
-        // Always cancel any existing speech first
-        speechSynthesis.cancel();
+        try {
+          // Always cancel any existing speech first
+          speechSynthesis.cancel();
 
-        // Clean up all refs and state
-        utteranceRef.current = null;
-        currentWordIndexRef.current = 0;
-        isPausingRef.current = false;
+          // Clean up all refs and state
+          utteranceRef.current = null;
+          currentWordIndexRef.current = 0;
+          isPausingRef.current = false;
 
-        // Update voice selection
-        setSelectedVoiceIndex(voiceIndex);
+          // Update voice selection
+          setSelectedVoiceIndex(voiceIndex);
 
-        // Reset state to clean state
-        setState((prev) => ({
-          ...prev,
-          isPlaying: false,
-          isPaused: false,
-          currentWordIndex: 0,
-          progress: 0,
-          error: null
-        }));
+          // Reset state to clean state
+          setState((prev) => ({
+            ...prev,
+            isPlaying: false,
+            isPaused: false,
+            currentWordIndex: 0,
+            progress: 0,
+            error: null
+          }));
 
-        // If was playing before, restart from beginning with new voice
-        if (state.isPlaying) {
-          // Small delay to ensure cleanup is complete
-          setTimeout(() => {
-            controls.play();
-          }, 150);
+          // If was playing before, restart from beginning with new voice
+          if (state.isPlaying) {
+            debugLog("Restarting speech with new voice");
+            // Small delay to ensure cleanup is complete
+            setTimeout(() => {
+              controls.play();
+            }, 150);
+          }
+
+          debugLog("Voice changed successfully");
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+          debugLog("Voice change error", { error: errorMessage });
         }
+      } else {
+        debugLog("Invalid voice index", { voiceIndex, availableCount: availableVoices.length });
       }
     }
   };
