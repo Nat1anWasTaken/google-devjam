@@ -3,15 +3,36 @@
 import { NewsCard } from "@/components/news-card";
 import { NewsLoadingAnimation } from "@/components/news-loading-animation";
 import { Button } from "@/components/ui/button";
-import { generateNews } from "@/lib/api/news";
-import { useQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
+import { forceGenerateNews, generateNews } from "@/lib/api/news";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2Icon, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 export default function NewsPage() {
+  const queryClient = useQueryClient();
+
   const query = useQuery({
     queryKey: ["news"],
     queryFn: generateNews,
     retry: 2
+  });
+
+  const regenerateNewsMutation = useMutation({
+    mutationFn: forceGenerateNews,
+    onSuccess: () => {
+      queryClient.setQueryData(["news"], (oldData: any) => {
+        if (!oldData || typeof oldData !== "object" || !("all_news" in oldData)) return oldData;
+
+        // Forcefully regenerate news by clearing existing data
+        return {
+          ...oldData,
+          all_news: []
+        };
+      });
+    },
+    onError: (error: Error) => {
+      toast.error("重新生成新聞失敗，請稍後再試。" + error);
+    }
   });
 
   const handleRetry = () => {
