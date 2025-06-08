@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { useTextToSpeech } from "@/hooks/use-text-to-speech";
 import { cn, formatTime } from "@/lib/utils";
 import { AlertCircle, Pause, Play, RotateCcw, Settings, Volume2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface TtsAudioPlayerProps {
@@ -25,12 +25,56 @@ interface WordHighlighterProps {
 }
 
 const WordHighlighter: React.FC<WordHighlighterProps> = ({ words, currentWordIndex, onWordClick, isPlaying }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  // Auto-scroll to current word when it changes and is playing
+  useEffect(() => {
+    if (!isPlaying || currentWordIndex < 0 || currentWordIndex >= words.length) {
+      return;
+    }
+
+    const container = containerRef.current;
+    const currentWordElement = wordRefs.current[currentWordIndex];
+
+    if (container && currentWordElement) {
+      const containerRect = container.getBoundingClientRect();
+      const wordRect = currentWordElement.getBoundingClientRect();
+
+      // Calculate relative position within the container
+      const relativeTop = wordRect.top - containerRect.top + container.scrollTop;
+      const relativeBottom = relativeTop + wordRect.height;
+
+      // Check if word is outside visible area
+      const isAboveView = relativeTop < container.scrollTop;
+      const isBelowView = relativeBottom > container.scrollTop + container.clientHeight;
+
+      if (isAboveView || isBelowView) {
+        // Calculate scroll position to center the word
+        const scrollTop = relativeTop - container.clientHeight / 2 + wordRect.height / 2;
+
+        container.scrollTo({
+          top: Math.max(0, scrollTop),
+          behavior: "smooth"
+        });
+      }
+    }
+  }, [currentWordIndex, isPlaying, words.length]);
+
+  // Initialize word refs array when words change
+  useEffect(() => {
+    wordRefs.current = wordRefs.current.slice(0, words.length);
+  }, [words.length]);
+
   return (
-    <div className="mt-4 p-4 bg-muted/30 rounded-lg max-h-32 overflow-y-auto">
+    <div ref={containerRef} className="mt-4 p-4 bg-muted/30 rounded-lg max-h-32 overflow-y-auto">
       <div className="text-sm leading-relaxed select-none">
         {words.map((word, index) => (
           <React.Fragment key={index}>
             <span
+              ref={(el) => {
+                wordRefs.current[index] = el;
+              }}
               className={cn(
                 "cursor-pointer hover:bg-muted px-0.5 py-0.5 rounded transition-colors inline-block",
                 index === currentWordIndex && isPlaying ? "bg-primary text-primary-foreground font-medium" : "hover:bg-muted"
