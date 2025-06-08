@@ -53,7 +53,7 @@ export function BottomNavigation() {
   const rightTabs = tabs.slice(2); // news, user
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg z-50" role="tablist" aria-label="Main navigation">
+    <nav className="absolute bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg z-50" role="tablist" aria-label="Main navigation">
       <div className="flex h-16 items-center">
         {/* Left tabs */}
         <div className="flex flex-1">

@@ -30,7 +30,7 @@ export function PhoneViewportContainer({ children }: PhoneViewportContainerProps
 
   // On mobile devices, render full screen (native experience)
   if (mobile) {
-    return <div className="h-screen flex flex-col">{children}</div>;
+    return <div className="h-screen flex flex-col relative">{children}</div>;
   }
 
   // On larger screens, render in a phone-sized container
@@ -48,7 +48,7 @@ export function PhoneViewportContainer({ children }: PhoneViewportContainerProps
             }}
           >
             {/* App content */}
-            <div className="h-full flex flex-col bg-background text-foreground">{children}</div>
+            <div className="h-full flex flex-col bg-background text-foreground relative">{children}</div>
           </div>
         </div>
 
