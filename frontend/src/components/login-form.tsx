@@ -42,7 +42,7 @@ export function LoginForm({ className, onSubmit, isSubmitting, error, ...props }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="bg-transparent border-none shadow-none">
+      <Card className="bg-transparent border-none shadow-none hover:bg-transparent">
         <CardHeader>
           <CardTitle>登入</CardTitle>
           <CardDescription>使用您的帳號登入以繼續</CardDescription>

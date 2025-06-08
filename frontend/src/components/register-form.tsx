@@ -69,7 +69,7 @@ export function RegisterForm({ className, onSubmit, isSubmitting = false, error,
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="bg-transparent border-none shadow-none">
+      <Card className="bg-transparent border-none shadow-none hover:bg-transparent">
         <CardHeader>
           <CardTitle>註冊</CardTitle>
           <CardDescription>輸入你的資訊來創建你的帳號</CardDescription>
