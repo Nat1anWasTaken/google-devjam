@@ -3,14 +3,11 @@
 import { NewsCard } from "@/components/news-card";
 import { NewsLoadingAnimation } from "@/components/news-loading-animation";
 import { Button } from "@/components/ui/button";
-import { forceGenerateNews, generateNews } from "@/lib/api/news";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { generateNews } from "@/lib/api/news";
+import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { toast } from "sonner";
 
 export default function NewsPage() {
-  const queryClient = useQueryClient();
-
   const query = useQuery({
     queryKey: ["news"],
     queryFn: generateNews,
