@@ -17,24 +17,6 @@ export default function NewsPage() {
     retry: 2
   });
 
-  const regenerateNewsMutation = useMutation({
-    mutationFn: forceGenerateNews,
-    onSuccess: () => {
-      queryClient.setQueryData(["news"], (oldData: any) => {
-        if (!oldData || typeof oldData !== "object" || !("all_news" in oldData)) return oldData;
-
-        // Forcefully regenerate news by clearing existing data
-        return {
-          ...oldData,
-          all_news: []
-        };
-      });
-    },
-    onError: (error: Error) => {
-      toast.error("重新生成新聞失敗，請稍後再試。" + error);
-    }
-  });
-
   const handleRetry = () => {
     query.refetch();
   };
