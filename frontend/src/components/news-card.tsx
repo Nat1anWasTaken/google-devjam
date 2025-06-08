@@ -17,7 +17,7 @@ export function NewsCard({ news }: NewsCardProps) {
 
   return (
     <Card
-      className="w-full"
+      className="w-full cursor-pointer"
       onClick={() => {
         router.push("/news/" + news.id);
       }}
