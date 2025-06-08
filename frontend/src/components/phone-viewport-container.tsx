@@ -43,8 +43,8 @@ export function PhoneViewportContainer({ children }: PhoneViewportContainerProps
           <div
             className="bg-black rounded-[2rem] overflow-hidden relative"
             style={{
-              width: "375px",
-              height: "812px" // iPhone 12/13/14 dimensions
+              width: "430px",
+              height: "932px" // iPhone 12/13/14 dimensions
             }}
           >
             {/* App content */}
