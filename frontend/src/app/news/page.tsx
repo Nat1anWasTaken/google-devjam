@@ -5,7 +5,7 @@ import { NewsLoadingAnimation } from "@/components/news-loading-animation";
 import { Button } from "@/components/ui/button";
 import { forceGenerateNews, generateNews } from "@/lib/api/news";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2Icon, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 export default function NewsPage() {
