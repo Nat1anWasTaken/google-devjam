@@ -431,11 +431,18 @@ func ForceGenerateNews(c echo.Context) error {
 		})
 	}
 
-	// Step 1: Get all existing user news for context
-	allNews, err := getAllUserNews(userID)
+	// Step 1: Delete all existing user news
+	newsCollection := mongodb.GetCollection("news")
+	if newsCollection == nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Database connection error",
+		})
+	}
+
+	_, err := newsCollection.DeleteMany(context.Background(), bson.M{"user_id": userID})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get user news: " + err.Error(),
+			"error": "Failed to delete existing news: " + err.Error(),
 		})
 	}
 
@@ -454,26 +461,15 @@ func ForceGenerateNews(c echo.Context) error {
 		})
 	}
 
-	// Step 4: Generate 4 new articles
-	newsCollection := mongodb.GetCollection("news")
-	if newsCollection == nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Database connection error",
-		})
-	}
+// Step 4: Generate 4 new articles
+var newlyGeneratedNews []model.News
 
-	var newlyGeneratedNews []model.News
-
-	for i := 0; i < 4; i++ {
-		// Get existing titles to avoid duplicate topics
-		existingTitles := make([]string, len(allNews))
-		for j, news := range allNews {
-			existingTitles[j] = news.Title
-		}
-		// Also add titles from newly generated news in this batch
-		for _, news := range newlyGeneratedNews {
-			existingTitles = append(existingTitles, news.Title)
-		}
+for i := 0; i < 4; i++ {
+// Get existing titles to avoid duplicate topics (only from newly generated news in this batch)
+var existingTitles []string
+for _, news := range newlyGeneratedNews {
+existingTitles = append(existingTitles, news.Title)
+}
 
 		// Generate news using Gemini
 		newsReq := gemini.NewsGenerationRequest{
