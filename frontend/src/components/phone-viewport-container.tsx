@@ -48,7 +48,7 @@ export function PhoneViewportContainer({ children }: PhoneViewportContainerProps
             }}
           >
             {/* App content */}
-            <div className="h-full flex flex-col bg-background text-foreground relative">{children}</div>
+            <div className="h-full flex flex-col bg-background text-foreground relative overflow-hidden">{children}</div>
           </div>
         </div>
 

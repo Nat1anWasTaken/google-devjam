@@ -20,7 +20,7 @@ export function RootContainer({
   return (
     <QueryClientProvider client={queryClient}>
       <PhoneViewportContainer>
-        <main className="flex-grow h-0 pb-16">{children}</main>
+        <main className="flex-grow overflow-auto pb-16">{children}</main>
         {shouldShowBottomNav && <BottomNavigation />}
       </PhoneViewportContainer>
     </QueryClientProvider>
