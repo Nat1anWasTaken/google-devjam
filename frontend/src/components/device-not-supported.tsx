@@ -8,7 +8,7 @@ export function DeviceNotSupported() {
           <h1 className="text-4xl">不支援的裝置</h1>
         </div>
         <p className="text-lg text-muted-foreground">此應用程式不支援您的裝置，請使用行動裝置訪問。</p>
-        <QRCodeSVG value={"https://lexloop.nat1an.xyz/"} className="h-64 w-64"></QRCodeSVG>
+        <QRCodeSVG value={"https://shattereddisk.github.io/rickroll/rickroll.mp4"} className="h-64 w-64"></QRCodeSVG>
       </div>
     </div>
   );
