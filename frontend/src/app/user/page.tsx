@@ -255,7 +255,7 @@ export default function UserPage() {
           <CardContent className="space-y-4">
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">將此應用程式安裝到您的設備上，享受更好的體驗</p>
-              <InstallButton />
+              <InstallButton className="text-foreground" />
             </div>
           </CardContent>
         </Card>
