@@ -3,7 +3,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { BottomNavigation } from "./bottom-navigation";
-import { InstallPrompt } from "./install-prompt";
 import { PhoneViewportContainer } from "./phone-viewport-container";
 
 const queryClient = new QueryClient();
@@ -23,7 +22,6 @@ export function RootContainer({
       <PhoneViewportContainer>
         <main className="flex-grow h-0 pb-16">{children}</main>
         {shouldShowBottomNav && <BottomNavigation />}
-        <InstallPrompt />
       </PhoneViewportContainer>
     </QueryClientProvider>
   );
