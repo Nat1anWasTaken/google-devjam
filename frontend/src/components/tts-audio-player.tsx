@@ -309,7 +309,7 @@ export const TtsAudioPlayer: React.FC<TtsAudioPlayerProps> = ({ text, newsId: _n
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <AlertCircle className="h-4 w-4 text-destructive" />
-                  <span className="text-sm text-destructive">{error || "TTS may not be working properly"}</span>
+                  <span className="text-sm text-destructive">{error || "TTS is still WIP and might not work as expected"}</span>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => setShowDebugInfo(true)} className="h-6 px-2 text-xs">
                   Show Debug Info
