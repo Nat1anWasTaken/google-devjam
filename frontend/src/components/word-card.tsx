@@ -17,7 +17,7 @@ export function WordCard({ word }: WordCardProps) {
 
   return (
     <Card
-      className="w-full max-w-sm"
+      className="w-full max-w-sm cursor-pointer"
       onClick={() => {
         router.push(`/vocabulary/${word.id}`);
       }}
